@@ -21,7 +21,7 @@ function App() {
     <main className="contenedor">
       <h1>Autiva</h1>
       <p className="subtitulo">Expediente digital vehicular</p>
-      <p className="version">Versión 1.1</p>
+      <p className="version">Versión mejorara 1.2</p>
 
       <section className="tarjeta">
         <h2>Estado de la API</h2>
