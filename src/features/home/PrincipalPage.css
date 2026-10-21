@@ -1,0 +1,31 @@
+.principal .tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.principal .correo {
+  color: #7d7e81;
+  font-size: 0.9rem;
+}
+
+.principal .tarjeta button {
+  margin-top: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #c0392b;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.principal .tarjeta button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.principal .error {
+  color: #c0392b;
+}
