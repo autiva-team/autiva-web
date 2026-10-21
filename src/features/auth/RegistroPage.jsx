@@ -6,7 +6,7 @@ function validarEmail(correo) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)
 }
 
-export default function RegistroPage() {
+export default function RegistroPage({ onIrALogin }) {
   const [form, setForm] = useState({
     nombre: '',
     correo: '',
@@ -161,6 +161,14 @@ export default function RegistroPage() {
           {cargando ? 'Creando cuenta...' : 'Crear cuenta'}
         </button>
       </form>
+      {onIrALogin && (
+        <p className="enlace">
+          ¿Ya tienes cuenta?{' '}
+          <button type="button" className="link" onClick={onIrALogin}>
+            Iniciar sesión
+          </button>
+        </p>
+      )}
     </main>
   )
 }
