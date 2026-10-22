@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { iniciarSesion } from './authApi'
+import BotonInstalar from '../../components/BotonInstalar'
 import './LoginPage.css'
 
 function validarEmail(correo) {
@@ -106,6 +107,7 @@ export default function LoginPage({ onLogin, onIrARegistro }) {
           Crear cuenta
         </button>
       </p>
+      <BotonInstalar />
     </main>
   )
 }
