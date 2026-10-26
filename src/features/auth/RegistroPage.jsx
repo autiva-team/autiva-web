@@ -1,11 +1,8 @@
 import { useState } from 'react'
 import { registrarUsuario } from './authApi'
 import AppShell from '../../components/AppShell'
+import { validarEmail } from '../../utils/validaciones'
 import './RegistroPage.css'
-
-function validarEmail(correo) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)
-}
 
 export default function RegistroPage({ onIrALogin }) {
   const [form, setForm] = useState({
