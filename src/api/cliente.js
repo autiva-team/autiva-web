@@ -24,6 +24,13 @@ export async function request(ruta, opciones = {}) {
     } catch {
       // respuesta sin cuerpo JSON
     }
+
+    if (respuesta.status === 401 && !ruta.startsWith('/api/auth/')) {
+      localStorage.removeItem('autiva_token')
+      localStorage.removeItem('autiva_usuario')
+      window.dispatchEvent(new Event('autiva:unauthorized'))
+    }
+
     const error = new Error(datos?.mensaje || `Error ${respuesta.status}`)
     error.status = respuesta.status
     error.errores = datos?.errores

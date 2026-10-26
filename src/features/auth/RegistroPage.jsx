@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { registrarUsuario } from './authApi'
+import AppShell from '../../components/AppShell'
 import './RegistroPage.css'
 
 function validarEmail(correo) {
@@ -99,10 +100,8 @@ export default function RegistroPage({ onIrALogin }) {
   }
 
   return (
-    <main className="contenedor registro">
-      <h1>Autiva</h1>
-      <p className="subtitulo">Crear cuenta</p>
-      <form className="tarjeta formulario" onSubmit={onSubmit} noValidate>
+    <AppShell subtitulo="Crear cuenta">
+      <form className="formulario" onSubmit={onSubmit} noValidate>
         <label>
           Nombre
           <input
@@ -162,13 +161,13 @@ export default function RegistroPage({ onIrALogin }) {
         </button>
       </form>
       {onIrALogin && (
-        <p className="enlace">
+        <p className="auth-enlace">
           ¿Ya tienes cuenta?{' '}
           <button type="button" className="link" onClick={onIrALogin}>
             Iniciar sesión
           </button>
         </p>
       )}
-    </main>
+    </AppShell>
   )
 }
