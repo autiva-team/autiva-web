@@ -1,0 +1,55 @@
+.vehiculo-registro .formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.vehiculo-registro .formulario label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+}
+
+.vehiculo-registro .formulario input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.vehiculo-registro .acciones {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.vehiculo-registro .acciones button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #25163a;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.vehiculo-registro .acciones .secundario {
+  background: #7d7e81;
+}
+
+.vehiculo-registro .acciones button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vehiculo-registro .exito {
+  color: #1e7e34;
+}
+
+.vehiculo-registro .error {
+  color: #c0392b;
+  font-size: 0.85rem;
+}

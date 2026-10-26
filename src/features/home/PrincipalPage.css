@@ -26,6 +26,10 @@
   cursor: not-allowed;
 }
 
+.principal .tarjeta .secundario {
+  background: #25163a;
+}
+
 .principal .error {
   color: #c0392b;
 }

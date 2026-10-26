@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { cerrarSesion } from '../auth/authApi'
 import './PrincipalPage.css'
 
-export default function PrincipalPage({ usuario, onLogout }) {
+export default function PrincipalPage({ usuario, onLogout, onRegistrarVehiculo }) {
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState('')
 
@@ -33,6 +33,15 @@ export default function PrincipalPage({ usuario, onLogout }) {
           </>
         )}
         {error && <p className="error">{error}</p>}
+        {onRegistrarVehiculo && (
+          <button
+            type="button"
+            className="secundario"
+            onClick={onRegistrarVehiculo}
+          >
+            Registrar vehículo
+          </button>
+        )}
         <button type="button" onClick={handleLogout} disabled={cargando}>
           {cargando ? 'Cerrando sesión...' : 'Cerrar sesión'}
         </button>

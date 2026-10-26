@@ -2,6 +2,7 @@ import { useState } from 'react'
 import LoginPage from './features/auth/LoginPage.jsx'
 import RegistroPage from './features/auth/RegistroPage.jsx'
 import PrincipalPage from './features/home/PrincipalPage.jsx'
+import VehiculoRegistroPage from './features/vehiculos/VehiculoRegistroPage.jsx'
 import './App.css'
 
 const USUARIO_KEY = 'autiva_usuario'
@@ -44,7 +45,22 @@ function App() {
   }
 
   if (vista === 'principal') {
-    return <PrincipalPage usuario={usuario} onLogout={handleLogout} />
+    return (
+      <PrincipalPage
+        usuario={usuario}
+        onLogout={handleLogout}
+        onRegistrarVehiculo={() => setVista('registrarVehiculo')}
+      />
+    )
+  }
+
+  if (vista === 'registrarVehiculo') {
+    return (
+      <VehiculoRegistroPage
+        onVolver={() => setVista('principal')}
+        onRegistrado={() => setVista('principal')}
+      />
+    )
   }
 
   if (vista === 'registro') {
