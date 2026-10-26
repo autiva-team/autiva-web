@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { iniciarSesion } from './authApi'
+import AppShell from '../../components/AppShell'
 import './LoginPage.css'
 
 function validarEmail(correo) {
@@ -64,10 +65,8 @@ export default function LoginPage({ onLogin, onIrARegistro }) {
   }
 
   return (
-    <main className="contenedor login">
-      <h1>Autiva</h1>
-      <p className="subtitulo">Iniciar sesión</p>
-      <form className="tarjeta formulario" onSubmit={onSubmit} noValidate>
+    <AppShell subtitulo="Iniciar sesión">
+      <form className="formulario" onSubmit={onSubmit} noValidate>
         <label>
           Correo electrónico
           <input
@@ -100,12 +99,12 @@ export default function LoginPage({ onLogin, onIrARegistro }) {
           {cargando ? 'Ingresando...' : 'Iniciar sesión'}
         </button>
       </form>
-      <p className="enlace">
+      <p className="auth-enlace">
         ¿No tienes cuenta?{' '}
         <button type="button" className="link" onClick={onIrARegistro}>
           Crear cuenta
         </button>
       </p>
-    </main>
+    </AppShell>
   )
 }

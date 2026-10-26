@@ -2,6 +2,17 @@ import { useState } from 'react'
 import { registrarVehiculo } from './vehiculosApi'
 import './VehiculoRegistroPage.css'
 
+const TAMANO_MAXIMO_FOTO = 2 * 1024 * 1024
+
+function leerArchivoComoDataUrl(archivo) {
+  return new Promise((resolve, reject) => {
+    const lector = new FileReader()
+    lector.onload = () => resolve(lector.result)
+    lector.onerror = () => reject(new Error('No se pudo leer la imagen.'))
+    lector.readAsDataURL(archivo)
+  })
+}
+
 export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
   const [form, setForm] = useState({
     marca: '',
@@ -10,8 +21,8 @@ export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
     placas: '',
     kilometrajeInicial: '',
     color: '',
-    fotoUrl: '',
   })
+  const [fotoPreview, setFotoPreview] = useState('')
   const [errores, setErrores] = useState({})
   const [errorApi, setErrorApi] = useState('')
   const [exito, setExito] = useState('')
@@ -19,13 +30,46 @@ export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
 
   const onChange = (e) => {
     const { name, value } = e.target
-    setForm((f) => ({ ...f, [name]: value }))
+    setForm((f) => ({
+      ...f,
+      [name]: name === 'placas' ? value.toUpperCase() : value,
+    }))
+  }
+
+  const onFotoChange = async (e) => {
+    const archivo = e.target.files?.[0]
+    if (!archivo) {
+      setFotoPreview('')
+      return
+    }
+
+    if (!archivo.type.startsWith('image/')) {
+      setErrorApi('Selecciona un archivo de imagen válido.')
+      e.target.value = ''
+      return
+    }
+
+    if (archivo.size > TAMANO_MAXIMO_FOTO) {
+      setErrorApi('La imagen no puede superar los 2 MB.')
+      e.target.value = ''
+      return
+    }
+
+    try {
+      const dataUrl = await leerArchivoComoDataUrl(archivo)
+      setFotoPreview(dataUrl)
+      setErrorApi('')
+    } catch {
+      setErrorApi('No se pudo leer la imagen seleccionada.')
+      e.target.value = ''
+    }
   }
 
   const validar = () => {
     const e = {}
     const anio = Number(form.anio)
     const km = Number(form.kilometrajeInicial)
+    const placas = form.placas.trim()
 
     if (!form.marca.trim()) e.marca = 'La marca es obligatoria.'
     else if (form.marca.trim().length > 50)
@@ -36,23 +80,22 @@ export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
       e.modelo = 'El modelo no puede superar los 50 caracteres.'
 
     if (!form.anio) e.anio = 'El año es obligatorio.'
-    else if (!Number.isInteger(anio) || anio < 1900 || anio > 2100)
-      e.anio = 'Ingresa un año válido.'
+    else if (!/^\d{4}$/.test(form.anio) || anio < 1900 || anio > 2100)
+      e.anio = 'Ingresa un año válido de 4 dígitos.'
 
-    if (!form.placas.trim()) e.placas = 'Las placas son obligatorias.'
-    else if (form.placas.trim().length > 15)
+    if (!placas) e.placas = 'Las placas son obligatorias.'
+    else if (placas.length > 15)
       e.placas = 'Las placas no pueden superar los 15 caracteres.'
+    else if (!/^[A-Z0-9-]+$/.test(placas))
+      e.placas = 'Las placas solo pueden tener letras, números y guiones.'
 
     if (form.kilometrajeInicial === '')
       e.kilometrajeInicial = 'El kilometraje inicial es obligatorio.'
-    else if (!Number.isInteger(km) || km < 0)
+    else if (!Number.isInteger(km) || km < 0 || km > 9999999)
       e.kilometrajeInicial = 'Ingresa un kilometraje válido.'
 
     if (form.color.trim().length > 30)
       e.color = 'El color no puede superar los 30 caracteres.'
-
-    if (form.fotoUrl.trim().length > 500)
-      e.fotoUrl = 'La URL de la foto no puede superar los 500 caracteres.'
 
     return e
   }
@@ -71,13 +114,13 @@ export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
         marca: form.marca.trim(),
         modelo: form.modelo.trim(),
         anio: Number(form.anio),
-        placas: form.placas.trim().toUpperCase(),
+        placas: form.placas.trim(),
         kilometrajeInicial: Number(form.kilometrajeInicial),
         color: form.color.trim(),
-        fotoUrl: form.fotoUrl.trim(),
+        fotoUrl: null,
       })
       setExito(`Vehículo registrado: ${datos.marca} ${datos.modelo} (${datos.placas}).`)
-      if (onRegistrado) onRegistrado(datos)
+      if (onRegistrado) onRegistrado(datos, fotoPreview)
       setForm({
         marca: '',
         modelo: '',
@@ -85,8 +128,8 @@ export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
         placas: '',
         kilometrajeInicial: '',
         color: '',
-        fotoUrl: '',
       })
+      setFotoPreview('')
       setErrores({})
     } catch (err) {
       if (err.status === 409) {
@@ -106,79 +149,112 @@ export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
   }
 
   return (
-    <main className="contenedor vehiculo-registro">
-      <h1>Autiva</h1>
-      <p className="subtitulo">Registrar vehículo</p>
-      <form className="tarjeta formulario" onSubmit={onSubmit} noValidate>
-        <label>
-          Marca
-          <input name="marca" value={form.marca} onChange={onChange} />
-          {errores.marca && <span className="error">{errores.marca}</span>}
-        </label>
-
-        <label>
-          Modelo
-          <input name="modelo" value={form.modelo} onChange={onChange} />
-          {errores.modelo && <span className="error">{errores.modelo}</span>}
-        </label>
-
-        <label>
-          Año
-          <input
-            type="number"
-            name="anio"
-            value={form.anio}
-            onChange={onChange}
-            min="1900"
-            max="2100"
-          />
-          {errores.anio && <span className="error">{errores.anio}</span>}
-        </label>
-
-        <label>
-          Placas
-          <input name="placas" value={form.placas} onChange={onChange} />
-          {errores.placas && <span className="error">{errores.placas}</span>}
-        </label>
-
-        <label>
-          Kilometraje inicial
-          <input
-            type="number"
-            name="kilometrajeInicial"
-            value={form.kilometrajeInicial}
-            onChange={onChange}
-            min="0"
-          />
-          {errores.kilometrajeInicial && (
-            <span className="error">{errores.kilometrajeInicial}</span>
-          )}
-        </label>
-
-        <label>
-          Color (opcional)
-          <input name="color" value={form.color} onChange={onChange} />
-          {errores.color && <span className="error">{errores.color}</span>}
-        </label>
-
-        <label>
-          Foto (URL, opcional)
-          <input name="fotoUrl" value={form.fotoUrl} onChange={onChange} />
-          {errores.fotoUrl && <span className="error">{errores.fotoUrl}</span>}
-        </label>
-
-        {errorApi && <p className="error">{errorApi}</p>}
-        {exito && <p className="exito">{exito}</p>}
-
-        <div className="acciones">
-          <button type="button" className="secundario" onClick={onVolver}>
-            Volver
-          </button>
-          <button type="submit" disabled={cargando}>
-            {cargando ? 'Registrando...' : 'Registrar vehículo'}
-          </button>
+    <div className="vehiculo-registro">
+      <section className="page-head">
+        <div>
+          <h2>Registrar vehículo</h2>
+          <p>Completa los datos para crear su expediente digital.</p>
         </div>
-      </form>
-    </main>
+      </section>
+
+      <section className="tarjeta formulario-card">
+        <form className="formulario form-grid" onSubmit={onSubmit} noValidate>
+          <label>
+            Marca
+            <input name="marca" value={form.marca} onChange={onChange} maxLength={50} />
+            {errores.marca && <span className="error">{errores.marca}</span>}
+          </label>
+
+          <label>
+            Modelo
+            <input name="modelo" value={form.modelo} onChange={onChange} maxLength={50} />
+            {errores.modelo && <span className="error">{errores.modelo}</span>}
+          </label>
+
+          <label>
+            Año
+            <input
+              type="text"
+              inputMode="numeric"
+              name="anio"
+              value={form.anio}
+              onChange={onChange}
+              maxLength={4}
+              placeholder="2024"
+            />
+            {errores.anio && <span className="error">{errores.anio}</span>}
+          </label>
+
+          <label>
+            Placas
+            <input
+              name="placas"
+              value={form.placas}
+              onChange={onChange}
+              maxLength={15}
+              placeholder="ABC-1234"
+              style={{ textTransform: 'uppercase' }}
+            />
+            {errores.placas && <span className="error">{errores.placas}</span>}
+          </label>
+
+          <label>
+            Kilometraje inicial
+            <input
+              type="number"
+              name="kilometrajeInicial"
+              value={form.kilometrajeInicial}
+              onChange={onChange}
+              min="0"
+              max="9999999"
+            />
+            {errores.kilometrajeInicial && (
+              <span className="error">{errores.kilometrajeInicial}</span>
+            )}
+          </label>
+
+          <label>
+            Color (opcional)
+            <input name="color" value={form.color} onChange={onChange} maxLength={30} />
+            {errores.color && <span className="error">{errores.color}</span>}
+          </label>
+
+          <label className="ancho-completo">
+            Foto (opcional)
+            <input
+              type="file"
+              accept="image/*"
+              onChange={onFotoChange}
+            />
+            <small className="ayuda">Selecciona una imagen de tu dispositivo (máx. 2 MB).</small>
+          </label>
+
+          {fotoPreview && (
+            <div className="ancho-completo foto-preview-contenedor">
+              <img src={fotoPreview} alt="Vista previa del vehículo" className="foto-preview" />
+              <button
+                type="button"
+                className="secundario foto-quitar"
+                onClick={() => setFotoPreview('')}
+              >
+                Quitar foto
+              </button>
+            </div>
+          )}
+
+          {errorApi && <p className="error">{errorApi}</p>}
+          {exito && <p className="exito">{exito}</p>}
+
+          <div className="acciones">
+            <button type="button" className="secundario" onClick={onVolver}>
+              Volver
+            </button>
+            <button type="submit" disabled={cargando}>
+              {cargando ? 'Registrando...' : 'Registrar vehículo'}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
   )
 }

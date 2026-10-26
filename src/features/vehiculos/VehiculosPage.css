@@ -1,0 +1,144 @@
+.vehiculos-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.page-head h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.page-head p {
+  margin-top: 4px;
+  color: var(--color-secondary);
+  font-size: 0.85rem;
+}
+
+.accion-principal.compacta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.vehiculo-ficha {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 14px 32px rgba(37, 22, 58, 0.08);
+}
+
+.ficha-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ficha-icono {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(102, 158, 236, 0.2), rgba(100, 102, 230, 0.16));
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.ficha-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.ficha-head p {
+  margin-top: 2px;
+  color: var(--color-secondary);
+  font-size: 0.8rem;
+}
+
+.ficha-head .badge-activo {
+  margin-left: auto;
+}
+
+.ficha-datos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.ficha-datos span {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+.ficha-datos strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--color-title);
+  font-size: 0.9rem;
+}
+
+.vehiculos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ficha-foto {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+}
+
+.vehiculos-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 32px 20px;
+  background: #fff;
+  border: 1px dashed rgba(102, 158, 236, 0.45);
+  border-radius: 22px;
+}
+
+.vehiculos-vacio h3 {
+  margin: 4px 0 0;
+}
+
+.vehiculos-vacio p {
+  color: var(--color-secondary);
+  font-size: 0.85rem;
+  max-width: 320px;
+}
+
+.vehiculos-vacio .accion-principal {
+  margin-top: 8px;
+}
+
+@media (max-width: 420px) {
+  .ficha-datos {
+    grid-template-columns: 1fr;
+  }
+}
