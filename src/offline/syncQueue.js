@@ -35,13 +35,21 @@ export async function sincronizarPendientes() {
   }
 }
 
+// Ejecuta la sincronizacion en segundo plano sin bloquear a quien la llama.
+// El .catch() evita que un error (por ejemplo, al leer IndexedDB) quede como
+// una promesa rechazada sin manejar: se registra en consola y los pendientes
+// siguen en la cola para el siguiente intento.
+function sincronizarEnSegundoPlano() {
+  sincronizarPendientes().catch((error) => {
+    console.error('No se pudo sincronizar la cola offline:', error)
+  })
+}
+
 // Registra los disparadores de sincronizacion (al abrir la app y al volver la conexion).
 export function registrarSincronizacionAutomatica() {
   if (typeof window === 'undefined') return
 
-  sincronizarPendientes()
+  sincronizarEnSegundoPlano()
 
-  window.addEventListener('online', () => {
-    sincronizarPendientes()
-  })
+  window.addEventListener('online', sincronizarEnSegundoPlano)
 }

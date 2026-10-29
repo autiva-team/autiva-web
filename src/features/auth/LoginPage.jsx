@@ -1,11 +1,8 @@
 import { useState } from 'react'
 import { iniciarSesion } from './authApi'
 import AppShell from '../../components/AppShell'
+import { validarEmail } from '../../utils/validaciones'
 import './LoginPage.css'
-
-function validarEmail(correo) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)
-}
 
 export default function LoginPage({ onLogin, onIrARegistro }) {
   const [form, setForm] = useState({ correo: '', contrasena: '' })
