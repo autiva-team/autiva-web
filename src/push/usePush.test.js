@@ -91,3 +91,28 @@ describe('usePush', () => {
     expect(result.current.mensaje).toMatch(/desactivadas/)
   })
 })
+
+describe('usePush al desmontarse', () => {
+  it('ignora respuestas que llegan después de desmontar', async () => {
+    let resolverClave
+    let rechazarSuscripcion
+    vi.mocked(obtenerClavePublicaVapid).mockReturnValueOnce(new Promise((resolve) => (resolverClave = resolve)))
+    vi.mocked(obtenerSuscripcionActual).mockReturnValueOnce(new Promise((_, reject) => (rechazarSuscripcion = reject)))
+    const { result, unmount } = renderHook(() => usePush())
+    unmount()
+    resolverClave('clave')
+    rechazarSuscripcion(new Error('sin red'))
+    await Promise.resolve()
+    expect(result.current.servidorListo).toBeNull()
+  })
+
+  it('ignora el error de la clave si ya se desmontó', async () => {
+    let rechazarClave
+    vi.mocked(obtenerClavePublicaVapid).mockReturnValueOnce(new Promise((_, reject) => (rechazarClave = reject)))
+    const { result, unmount } = renderHook(() => usePush())
+    unmount()
+    rechazarClave(new Error('sin red'))
+    await Promise.resolve()
+    expect(result.current.servidorListo).toBeNull()
+  })
+})
