@@ -8,7 +8,8 @@ import Spinner from '../../components/Spinner'
 import { obtenerRendimiento } from '../cargas/cargasApi'
 import { obtenerHistorialServicios } from '../servicios/serviciosApi'
 import { obtenerResumenVehiculo } from '../vehiculos/vehiculosApi'
-import { estadoRecordatorio } from '../recordatorios/recordatoriosApi'
+import { estadoRecordatorio, listarRecordatoriosVehiculo } from '../recordatorios/recordatoriosApi'
+import { FUNCIONES } from '../../config/funciones'
 import { calcularEstadoLocal, leerRecordatoriosCreados } from '../recordatorios/recordatoriosLocales'
 
 function formatearMoneda(valor) {
@@ -113,6 +114,8 @@ export default function PrincipalPage({
   const [rendimiento, setRendimiento] = useState(null)
   const [ultimoServicio, setUltimoServicio] = useState(null)
   const [resumenVehiculo, setResumenVehiculo] = useState(null)
+  // Con la API completa: recordatorios del servidor (null = no se pudo consultar).
+  const [recordatoriosApi, setRecordatoriosApi] = useState([])
   const [modalOdometro, setModalOdometro] = useState(false)
   const [odometroNuevo, setOdometroNuevo] = useState('')
   const [errorOdometro, setErrorOdometro] = useState('')
@@ -145,6 +148,15 @@ export default function PrincipalPage({
       .catch(() => {
         if (activo) setUltimoServicio(null)
       })
+    if (FUNCIONES.listaRecordatorios) {
+      listarRecordatoriosVehiculo(vehiculoActivoId, { estado: 'pendiente' })
+        .then((datos) => {
+          if (activo) setRecordatoriosApi(Array.isArray(datos) ? datos : [])
+        })
+        .catch(() => {
+          if (activo) setRecordatoriosApi(null)
+        })
+    }
     obtenerResumenVehiculo(vehiculoActivoId)
       .then((datos) => {
         if (activo) setResumenVehiculo(datos)
@@ -164,8 +176,13 @@ export default function PrincipalPage({
 
   // La API publicada no lista recordatorios: se usan los creados en este dispositivo
   // (respuestas de POST .../recordatorios) y el resumen del servidor para los totales.
-  const recordatoriosVigentes = (vehiculoActivoId ? leerRecordatoriosCreados(vehiculoActivoId) : [])
-    .map((recordatorio) => calcularEstadoLocal(recordatorio, odometroActual))
+  const recordatoriosNoDisponibles = FUNCIONES.listaRecordatorios && recordatoriosApi === null
+  const fuenteRecordatorios = FUNCIONES.listaRecordatorios
+    ? recordatoriosApi || []
+    : (vehiculoActivoId ? leerRecordatoriosCreados(vehiculoActivoId) : []).map((recordatorio) =>
+        calcularEstadoLocal(recordatorio, odometroActual)
+      )
+  const recordatoriosVigentes = fuenteRecordatorios
     .filter((recordatorio) => recordatorio.estado !== 'concluido')
     .map((recordatorio) => ({ ...recordatorio, estadoUi: estadoRecordatorio(recordatorio) }))
   const alertas = recordatoriosVigentes.filter((recordatorio) =>
@@ -425,12 +442,14 @@ export default function PrincipalPage({
               </span>
               <span className="resumen-label">Seguro</span>
               <strong className="resumen-valor">
-                {seguro ? seguro.estadoUi.etiqueta : 'Sin recordatorio'}
+                {recordatoriosNoDisponibles ? '—' : seguro ? seguro.estadoUi.etiqueta : 'Sin recordatorio'}
               </strong>
               <span className="resumen-hint">
-                {seguro
-                  ? seguro.estadoUi.detalle
-                  : 'Crea un recordatorio con la fecha de vencimiento de tu póliza'}
+                {recordatoriosNoDisponibles
+                  ? 'No pudimos consultar tus recordatorios por ahora'
+                  : seguro
+                    ? seguro.estadoUi.detalle
+                    : 'Crea un recordatorio con la fecha de vencimiento de tu póliza'}
               </span>
               {seguro?.fechaLimite && <span className="resumen-fecha">{formatearFechaCorta(seguro.fechaLimite)}</span>}
             </button>
