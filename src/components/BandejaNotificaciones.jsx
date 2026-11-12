@@ -92,7 +92,14 @@ function BandejaConectada({ push, onCerrar, onCambioSinLeer }) {
 
   return (
     <Modal titulo="Notificaciones" onCerrar={onCerrar} className="bandeja">
-      {push.compatible && (
+      {push.compatible && push.servidorListo === false && (
+        <p className="bandeja-push bandeja-push--pendiente">
+          <span className="proximamente-etiqueta">Próximamente</span>
+          Los avisos en tu teléfono se activarán cuando el servidor termine su configuración. Mientras tanto, aquí verás tus notificaciones.
+        </p>
+      )}
+
+      {push.compatible && push.servidorListo && (
         <div className="bandeja-push">
           <span className={push.activa ? 'icono-tono tono-verde' : 'icono-tono tono-azul'} aria-hidden="true">
             <Icon name="bell" size={20} />
