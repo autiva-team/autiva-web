@@ -61,6 +61,10 @@ const ACCIONES_RAPIDAS = [
   { id: 'recordatorio', label: 'Recordatorio', detalle: 'Por fecha o por kilometraje', icon: 'bell' },
 ]
 
+/* Pantallas de captura: la barra inferior se oculta para que no tape campos;
+   la navegación queda en «Volver», «Cancelar» y el menú hamburguesa. */
+const VISTAS_FORMULARIO = ['registrarCarga', 'registrarServicio', 'registrarVehiculo']
+
 /* En móvil la barra inferior muestra lo más frecuente; el resto está en «Más». */
 const NAV_MOVIL = [
   { id: 'principal', label: 'Inicio', icon: 'home' },
@@ -94,6 +98,7 @@ export default function AppLayout({
   const [bandejaAbierta, setBandejaAbierta] = useState(false)
   // La barra inferior se oculta al leer hacia abajo para no tapar contenido.
   const [barraInferiorVisible, setBarraInferiorVisible] = useState(true)
+  const enFormulario = VISTAS_FORMULARIO.includes(vista)
 
   useEffect(() => {
     let anterior = window.scrollY
@@ -267,7 +272,13 @@ export default function AppLayout({
   )
 
   return (
-    <div className={colapsado ? 'app-layout app-layout--colapsado' : 'app-layout'}>
+    <div
+      className={[
+        'app-layout',
+        colapsado ? 'app-layout--colapsado' : '',
+        enFormulario ? 'app-layout--formulario' : '',
+      ].filter(Boolean).join(' ')}
+    >
       <FondoDinamico variante="suave" />
       <a className="skip-link" href="#contenido-principal">
         Saltar al contenido principal
@@ -416,7 +427,8 @@ export default function AppLayout({
           {children}
         </main>
 
-        {/* Navegación inferior (móvil y tableta) */}
+        {/* Navegación inferior (móvil y tableta); oculta en pantallas de captura */}
+        {!enFormulario && (
         <nav
           className={barraInferiorVisible ? 'bottom-nav' : 'bottom-nav bottom-nav--oculta'}
           aria-label="Navegación rápida"
@@ -453,6 +465,7 @@ export default function AppLayout({
             })}
           </ul>
         </nav>
+        )}
       </div>
 
       {registrarAbierto && (
