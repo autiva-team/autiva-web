@@ -1,8 +1,8 @@
 .placeholder-page {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  max-width: 620px;
+  gap: var(--esp-5);
+  max-width: 660px;
   margin: 0 auto;
 }
 
@@ -10,62 +10,69 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  padding: 26px 22px;
-  border-radius: 22px;
-  background:
-    radial-gradient(420px 220px at 100% 0%, rgba(103, 205, 241, 0.18), transparent 70%),
-    #fff;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 14px 32px rgba(37, 22, 58, 0.08);
+  gap: var(--esp-2);
+  padding: var(--esp-8) var(--esp-6);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-2);
 }
 
 .placeholder-icono {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radio-pill);
   display: grid;
   place-items: center;
-  margin-bottom: 4px;
+  margin-bottom: var(--esp-2);
+  background: var(--primario-suave);
+  color: var(--primario);
+  border: 1px solid var(--primario-borde);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
 }
 
 .placeholder-tag {
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: var(--texto-xs);
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--primario);
 }
 
 .placeholder-hero h2 {
   margin: 0;
-  font-size: 1.6rem;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--texto);
 }
 
 .placeholder-hero p {
-  color: var(--color-secondary);
-  font-size: 0.9rem;
-  max-width: 460px;
+  color: var(--texto-2);
+  font-size: 0.92rem;
+  max-width: 500px;
+  line-height: 1.5;
 }
 
 .placeholder-lista {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  border-radius: 18px;
-  background: #fff;
-  border: 1px solid var(--color-border);
+  gap: var(--esp-2);
+  padding: var(--esp-5);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-1);
 }
 
 .placeholder-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 11px;
-  background: #f8faff;
-  color: var(--color-title);
+  gap: var(--esp-3);
+  padding: 10px 14px;
+  border-radius: var(--radio-md);
+  background: var(--superficie-2);
+  color: var(--texto);
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -73,15 +80,14 @@
 .placeholder-check {
   width: 24px;
   height: 24px;
-  border-radius: 8px;
+  border-radius: var(--radio-pill);
   display: grid;
   place-items: center;
-  background: rgba(100, 102, 230, 0.12);
-  color: var(--color-accent);
+  background: var(--primario-suave);
+  color: var(--primario);
   flex-shrink: 0;
 }
 
 .placeholder-page .accion-principal {
   align-self: center;
-  padding: 12px 22px;
 }

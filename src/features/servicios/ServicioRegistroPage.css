@@ -1,0 +1,48 @@
+/* Registro de servicio: campos, botones y estados vienen del sistema (index.css). */
+
+.servicio-registro-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+}
+
+.comprobante-campo input[type='file'] {
+  min-height: 52px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.comprobante-campo input[type='file']::file-selector-button {
+  margin-right: var(--esp-3);
+  min-height: 32px;
+  padding: 6px 14px;
+  border: 1px solid var(--borde-control);
+  border-radius: var(--radio-sm);
+  background: var(--superficie-2);
+  color: var(--texto);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.comprobante-archivo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  padding: var(--esp-2) var(--esp-2) var(--esp-2) var(--esp-3);
+  border: 1px solid var(--exito-borde);
+  border-radius: var(--radio-sm);
+  background: var(--exito-suave);
+  color: var(--exito);
+}
+
+.comprobante-archivo span {
+  flex: 1;
+  min-width: 0;
+  color: var(--texto);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
