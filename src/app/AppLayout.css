@@ -1189,3 +1189,53 @@
     border-radius: 24px;
   }
 }
+
+/* ============================================================
+   Barra inferior: nunca tapa contenido ni el foco
+   ============================================================ */
+
+/* Más opaca: el contenido que pasa por debajo no se lee a través. */
+.bottom-nav {
+  background: rgba(255, 255, 255, 0.96);
+  transition: transform 0.25s ease, opacity 0.2s ease;
+  will-change: transform;
+}
+
+:root[data-theme='dark'] .bottom-nav {
+  background: rgba(19, 28, 46, 0.96);
+}
+
+/* Al leer hacia abajo se desliza fuera de la pantalla; vuelve al subir. */
+.bottom-nav--oculta {
+  transform: translateY(calc(100% + var(--flotante-margen) + var(--zona-abajo) + 24px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Con teclado siempre está visible. */
+.bottom-nav:focus-within {
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-nav {
+    transition: none;
+  }
+}
+
+/* El foco y los saltos de ancla nunca quedan detrás de las barras flotantes
+   (WCAG 2.4.11: el foco no queda oculto). */
+@media (max-width: 1023px) {
+  html {
+    scroll-padding-top: calc(var(--zona-arriba) + 96px);
+    scroll-padding-bottom: calc(var(--alto-nav-inferior) + var(--zona-abajo) + 16px);
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-top: calc(var(--zona-arriba) + 96px);
+  }
+}
