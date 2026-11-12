@@ -27,7 +27,12 @@ export function mensajeError(error, accion = 'completar la operación') {
     case 403:
       return `${base} Tu cuenta no tiene permiso para esta acción.`
     case 404:
-      return `${base} El registro ya no existe; actualiza la página para ver la información más reciente.`
+      // Con mensaje propio, la API indica qué no encontró (p. ej. el vehículo).
+      // Sin mensaje, la ruta no existe en el servidor: el servicio no está disponible.
+      if (error.message && !/^Error \d+$/.test(error.message)) {
+        return `${base} ${error.message}`
+      }
+      return `${base} Este servicio aún no está disponible en el servidor; inténtalo más tarde.`
     case 409:
       return `${base} ${error.message && !/^Error \d+$/.test(error.message) ? error.message : 'Ya existe un registro con esos datos.'}`
     case 429:

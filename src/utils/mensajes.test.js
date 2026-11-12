@@ -35,7 +35,10 @@ describe('mensajeError', () => {
   it('explica sesión vencida, permisos y registros inexistentes', () => {
     expect(mensajeError(errorHttp(401), 'cargar')).toMatch(/Tu sesión terminó/)
     expect(mensajeError(errorHttp(403), 'cargar')).toMatch(/no tiene permiso/)
-    expect(mensajeError(errorHttp(404), 'cargar')).toMatch(/ya no existe/)
+    expect(mensajeError(errorHttp(404), 'cargar')).toMatch(/aún no está disponible en el servidor/)
+    expect(mensajeError(errorHttp(404, { message: 'No se encontró el vehículo.' }), 'cargar')).toBe(
+      'No se pudo cargar. No se encontró el vehículo.'
+    )
   })
 
   it('en 409 usa el mensaje de la API o uno de duplicado', () => {
