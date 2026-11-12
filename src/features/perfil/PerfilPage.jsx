@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Icon from '../../components/Icons'
 import ConfirmarDialogo from '../../components/ConfirmarDialogo'
 import EncabezadoPagina from '../../components/EncabezadoPagina'
+import { FUNCIONES } from '../../config/funciones'
 import './PerfilPage.css'
 
 function iniciales(nombre = '') {
@@ -84,7 +85,7 @@ export default function PerfilPage({
           type="button"
           className="perfil-opcion"
           onClick={alternarNotificaciones}
-          disabled={pushCargando || !push?.compatible}
+          disabled={!FUNCIONES.notificacionesPush || pushCargando || !push?.compatible}
           role="switch"
           aria-checked={notificacionesActivas}
           aria-busy={pushCargando || undefined}
@@ -95,7 +96,9 @@ export default function PerfilPage({
           <span className="opcion-texto">
             <strong>Avisos en este dispositivo</strong>
             <small>
-              {!push?.compatible
+              {!FUNCIONES.notificacionesPush
+                ? 'Próximamente: avisos en tu teléfono antes de cada vencimiento.'
+                : !push?.compatible
                 ? 'Este navegador no admite notificaciones.'
                 : pushCargando
                   ? 'Procesando…'
