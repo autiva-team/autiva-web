@@ -1239,3 +1239,18 @@
     scroll-padding-top: calc(var(--zona-arriba) + 96px);
   }
 }
+
+/* Pantallas de captura sin barra inferior: el formulario usa todo el alto. */
+@media (max-width: 1023px) {
+  .app-layout--formulario .contenedor {
+    padding-bottom: calc(var(--zona-abajo) + var(--esp-8));
+  }
+
+  :root:has(.app-layout--formulario) .toast-region {
+    bottom: calc(var(--zona-abajo) + var(--esp-4));
+  }
+}
+
+:root:has(.app-layout--formulario) {
+  scroll-padding-bottom: calc(var(--zona-abajo) + 16px);
+}
