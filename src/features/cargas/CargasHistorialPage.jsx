@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { obtenerHistorialCargas, obtenerCarga, obtenerRendimiento } from './cargasApi'
 import Icon from '../../components/Icons'
+import { nombreVehiculo } from '../../utils/vehiculo'
 import Modal from '../../components/Modal'
 import Alerta from '../../components/Alerta'
 import EstadoVacio from '../../components/EstadoVacio'
@@ -159,7 +160,7 @@ export default function CargasHistorialPage({
             >
               {vehiculos.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.marca} {v.modelo} · {v.placas}
+                  {nombreVehiculo(v)}
                 </option>
               ))}
             </select>

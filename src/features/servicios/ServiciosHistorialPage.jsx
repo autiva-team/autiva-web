@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { obtenerHistorialServicios, obtenerServicio } from './serviciosApi'
 import Modal from '../../components/Modal'
 import Icon from '../../components/Icons'
+import { nombreVehiculo } from '../../utils/vehiculo'
 import { useAviso } from '../../components/Aviso'
 import Alerta from '../../components/Alerta'
 import EstadoVacio from '../../components/EstadoVacio'
@@ -88,7 +89,7 @@ export default function ServiciosHistorialPage({
             <select className="selector-vehiculo" value={vehiculoActual} onChange={(e) => cambiarVehiculo(e.target.value)}>
               {vehiculos.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.marca} {v.modelo} · {v.placas}
+                  {nombreVehiculo(v)}
                 </option>
               ))}
             </select>

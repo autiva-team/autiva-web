@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { obtenerVehiculo, obtenerResumenVehiculo } from './vehiculosApi'
+import { anioVehiculo, colorVehiculo, detalleVehiculo } from '../../utils/vehiculo'
 import Icon from '../../components/Icons'
 import Alerta from '../../components/Alerta'
 import { useAviso } from '../../components/Aviso'
@@ -121,9 +122,7 @@ export default function VehiculoDetallePage({
           <h1>
             {vehiculo.marca} {vehiculo.modelo}
           </h1>
-          <p className="page-subtitulo">
-            {vehiculo.placas} · {vehiculo.anio} · {vehiculo.color || 'Sin color'}
-          </p>
+          {detalleVehiculo(vehiculo) && <p className="page-subtitulo">{detalleVehiculo(vehiculo)}</p>}
         </div>
         <div className="page-head-acciones">
           {onEditar && (
@@ -175,18 +174,22 @@ export default function VehiculoDetallePage({
             <span>Modelo</span>
             <strong>{vehiculo.modelo}</strong>
           </div>
-          <div>
-            <span>Año</span>
-            <strong>{vehiculo.anio}</strong>
-          </div>
+          {anioVehiculo(vehiculo) && (
+            <div>
+              <span>Año</span>
+              <strong>{anioVehiculo(vehiculo)}</strong>
+            </div>
+          )}
           <div>
             <span>Placas</span>
             <strong>{vehiculo.placas}</strong>
           </div>
-          <div>
-            <span>Color</span>
-            <strong>{vehiculo.color || 'Sin color'}</strong>
-          </div>
+          {colorVehiculo(vehiculo) && (
+            <div>
+              <span>Color</span>
+              <strong>{colorVehiculo(vehiculo)}</strong>
+            </div>
+          )}
           <div>
             <span>Km inicial</span>
             <strong>{Number(vehiculo.kilometrajeInicial || 0).toLocaleString('es-MX')} km</strong>
