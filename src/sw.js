@@ -1,6 +1,13 @@
 import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { NetworkFirst } from 'workbox-strategies'
+import { clientsClaim } from 'workbox-core'
+
+// Actualización inmediata: la versión nueva del service worker se activa en
+// cuanto se instala y toma el control de las pestañas abiertas, en lugar de
+// esperar a que se cierren todas. La app se recarga sola al detectar el cambio.
+self.skipWaiting()
+clientsClaim()
 
 // App Shell (precaching)
 cleanupOutdatedCaches()
