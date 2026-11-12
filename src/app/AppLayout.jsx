@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Icon from '../components/Icons'
 import ConnectionBadge from '../components/ConnectionBadge'
+import { barraVisible } from './barraInferior'
 import Modal from '../components/Modal'
 import BandejaNotificaciones from '../components/BandejaNotificaciones'
 import FondoDinamico from '../components/FondoDinamico'
@@ -91,6 +92,36 @@ export default function AppLayout({
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [registrarAbierto, setRegistrarAbierto] = useState(false)
   const [bandejaAbierta, setBandejaAbierta] = useState(false)
+  // La barra inferior se oculta al leer hacia abajo para no tapar contenido.
+  const [barraInferiorVisible, setBarraInferiorVisible] = useState(true)
+
+  useEffect(() => {
+    let anterior = window.scrollY
+    let visible = true
+    let pendiente = false
+    const alDesplazar = () => {
+      if (pendiente) return
+      pendiente = true
+      requestAnimationFrame(() => {
+        pendiente = false
+        const actual = window.scrollY
+        const siguiente = barraVisible({
+          anterior,
+          actual,
+          alturaVista: window.innerHeight,
+          alturaTotal: document.documentElement.scrollHeight,
+          visible,
+        })
+        anterior = actual
+        if (siguiente !== visible) {
+          visible = siguiente
+          setBarraInferiorVisible(siguiente)
+        }
+      })
+    }
+    window.addEventListener('scroll', alDesplazar, { passive: true })
+    return () => window.removeEventListener('scroll', alDesplazar)
+  }, [])
   // Barra lateral colapsable en escritorio (se recuerda en el dispositivo).
   const [colapsado, setColapsado] = useState(() => {
     try {
@@ -386,7 +417,10 @@ export default function AppLayout({
         </main>
 
         {/* Navegación inferior (móvil y tableta) */}
-        <nav className="bottom-nav" aria-label="Navegación rápida">
+        <nav
+          className={barraInferiorVisible ? 'bottom-nav' : 'bottom-nav bottom-nav--oculta'}
+          aria-label="Navegación rápida"
+        >
           <ul>
             {NAV_MOVIL.map((item) => {
               const activo = vistaActiva === item.id
