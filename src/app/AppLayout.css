@@ -1254,3 +1254,11 @@
 :root:has(.app-layout--formulario) {
   scroll-padding-bottom: calc(var(--zona-abajo) + 16px);
 }
+
+.bandeja-push--pendiente {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-2);
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
+}

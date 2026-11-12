@@ -85,7 +85,7 @@ export default function PerfilPage({
           type="button"
           className="perfil-opcion"
           onClick={alternarNotificaciones}
-          disabled={!FUNCIONES.notificacionesPush || pushCargando || !push?.compatible}
+          disabled={!FUNCIONES.notificacionesPush || !push?.servidorListo || pushCargando || !push?.compatible}
           role="switch"
           aria-checked={notificacionesActivas}
           aria-busy={pushCargando || undefined}
@@ -98,6 +98,10 @@ export default function PerfilPage({
             <small>
               {!FUNCIONES.notificacionesPush
                 ? 'Próximamente: avisos en tu teléfono antes de cada vencimiento.'
+                : push?.servidorListo === false
+                  ? 'Próximamente: el servidor está terminando la configuración de avisos.'
+                  : push?.servidorListo == null
+                    ? 'Comprobando disponibilidad…'
                 : !push?.compatible
                 ? 'Este navegador no admite notificaciones.'
                 : pushCargando

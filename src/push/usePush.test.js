@@ -6,18 +6,35 @@ vi.mock('./suscripcion', () => ({
   pushCompatible: vi.fn(() => true),
   suscribirPush: vi.fn(),
   desuscribirPush: vi.fn(),
+  obtenerClavePublicaVapid: vi.fn(),
 }))
 
-import { desuscribirPush, obtenerSuscripcionActual, suscribirPush } from './suscripcion'
+import { desuscribirPush, obtenerClavePublicaVapid, obtenerSuscripcionActual, suscribirPush } from './suscripcion'
 import { usePush } from './usePush'
 
 beforeEach(() => {
   vi.mocked(obtenerSuscripcionActual).mockReset().mockResolvedValue(null)
   vi.mocked(suscribirPush).mockReset()
   vi.mocked(desuscribirPush).mockReset()
+  vi.mocked(obtenerClavePublicaVapid).mockReset().mockResolvedValue('clave')
 })
 
 describe('usePush', () => {
+  it('indica si el servidor tiene clave VAPID para suscribir', async () => {
+    const { result } = renderHook(() => usePush())
+    await waitFor(() => expect(result.current.servidorListo).toBe(true))
+  })
+
+  it('marca el servidor como no listo si la clave está vacía o falla', async () => {
+    vi.mocked(obtenerClavePublicaVapid).mockResolvedValueOnce('')
+    const vacia = renderHook(() => usePush())
+    await waitFor(() => expect(vacia.result.current.servidorListo).toBe(false))
+
+    vi.mocked(obtenerClavePublicaVapid).mockRejectedValueOnce(new Error('sin red'))
+    const conError = renderHook(() => usePush())
+    await waitFor(() => expect(conError.result.current.servidorListo).toBe(false))
+  })
+
   it('detecta una suscripción existente al iniciar', async () => {
     vi.mocked(obtenerSuscripcionActual).mockResolvedValue({ endpoint: 'x' })
     const { result } = renderHook(() => usePush())
