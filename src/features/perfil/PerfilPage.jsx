@@ -1,4 +1,7 @@
+import { useState } from 'react'
 import Icon from '../../components/Icons'
+import ConfirmarDialogo from '../../components/ConfirmarDialogo'
+import EncabezadoPagina from '../../components/EncabezadoPagina'
 import './PerfilPage.css'
 
 function iniciales(nombre = '') {
@@ -14,11 +17,32 @@ function iniciales(nombre = '') {
 export default function PerfilPage({
   usuario,
   onLogout,
-  onActivarPush,
-  pushCargando,
+  push,
 }) {
+  const [confirmarSalida, setConfirmarSalida] = useState(false)
+  const [saliendo, setSaliendo] = useState(false)
+  const notificacionesActivas = Boolean(push?.activa)
+  const pushCargando = Boolean(push?.cargando)
+
+  // POST /api/push/suscribir o /api/push/desuscribir según el estado actual.
+  const alternarNotificaciones = () => {
+    if (!push || pushCargando) return
+    if (notificacionesActivas) push.desactivar()
+    else push.activar()
+  }
+
+  const salir = async () => {
+    setSaliendo(true)
+    await onLogout()
+  }
+
+  const expira = usuario?.expiraEn ? new Date(usuario.expiraEn) : null
+  const expiraValida = expira && !Number.isNaN(expira.getTime())
+
   return (
-    <div className="perfil-page">
+    <div className="perfil-page contenedor">
+      <EncabezadoPagina titulo="Perfil" descripcion="Tus datos, tus preferencias y la sesión en este dispositivo." />
+
       <section className="perfil-card">
         <span className="perfil-avatar">{iniciales(usuario?.nombre)}</span>
         <div className="perfil-info">
@@ -32,56 +56,82 @@ export default function PerfilPage({
       </section>
 
       <section className="perfil-bloque">
-        <h3>Preferencias</h3>
+        <h2>Datos de la cuenta</h2>
+        <div className="perfil-datos">
+          <div>
+            <span>Nombre</span>
+            <strong>{usuario?.nombre || '—'}</strong>
+          </div>
+          <div>
+            <span>Correo</span>
+            <strong>{usuario?.correo || '—'}</strong>
+          </div>
+          <div>
+            <span>Tipo de cuenta</span>
+            <strong>{usuario?.tipoCuenta || 'Personal'}</strong>
+          </div>
+          <div>
+            <span>Sesión válida hasta</span>
+            <strong>{expiraValida ? expira.toLocaleDateString('es-MX') : 'Activa'}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section className="perfil-bloque">
+        <h2>Preferencias</h2>
 
         <button
           type="button"
           className="perfil-opcion"
-          onClick={onActivarPush}
-          disabled={pushCargando}
+          onClick={alternarNotificaciones}
+          disabled={pushCargando || !push?.compatible}
+          role="switch"
+          aria-checked={notificacionesActivas}
+          aria-busy={pushCargando || undefined}
         >
           <span className="opcion-icono tono-violeta">
             <Icon name="bell" size={20} />
           </span>
           <span className="opcion-texto">
-            <strong>Notificaciones push</strong>
-            <small>Recordatorios y avisos de tu vehículo</small>
+            <strong>Avisos en este dispositivo</strong>
+            <small>
+              {!push?.compatible
+                ? 'Este navegador no admite notificaciones.'
+                : pushCargando
+                  ? 'Procesando…'
+                  : notificacionesActivas
+                    ? 'Activos: te avisaremos antes de cada vencimiento.'
+                    : 'Desactivados. Actívalos para no olvidar vencimientos.'}
+            </small>
           </span>
-          <span className="opcion-accion">
-            {pushCargando ? 'Activando...' : 'Activar'}
+          <span className={notificacionesActivas ? 'switch on' : 'switch'} aria-hidden="true">
+            <span />
           </span>
         </button>
-
-        <div className="perfil-opcion estatica">
-          <span className="opcion-icono tono-azul">
-            <Icon name="car" size={20} />
-          </span>
-          <span className="opcion-texto">
-            <strong>Vehículo principal</strong>
-            <small>Se administra desde Mis Vehículos</small>
-          </span>
-        </div>
-
-        <div className="perfil-opcion estatica">
-          <span className="opcion-icono tono-cian">
-            <Icon name="chart" size={20} />
-          </span>
-          <span className="opcion-texto">
-            <strong>Resumen de uso</strong>
-            <small>Disponible en Estadísticas</small>
-          </span>
-        </div>
       </section>
 
       <section className="perfil-bloque">
-        <h3>Cuenta</h3>
-        <button type="button" className="perfil-salir" onClick={onLogout}>
+        <h2>Cuenta</h2>
+        <button type="button" className="perfil-salir" onClick={() => setConfirmarSalida(true)}>
           <Icon name="logout" size={20} />
           Cerrar sesión
         </button>
       </section>
 
-      <p className="perfil-version">Autiva · Expediente digital vehicular</p>
+      <p className="perfil-version">Autiva · Expediente digital vehicular · v1.0</p>
+
+      {confirmarSalida && (
+        <ConfirmarDialogo
+          titulo="¿Cerrar sesión?"
+          mensaje="Tus datos quedan guardados en tu cuenta. Para volver a verlos tendrás que iniciar sesión con tu correo y contraseña."
+          textoConfirmar="Cerrar sesión"
+          textoCancelar="Seguir aquí"
+          textoProceso="Cerrando sesión…"
+          onConfirmar={salir}
+          onCancelar={() => setConfirmarSalida(false)}
+          cargando={saliendo}
+        />
+      )}
     </div>
   )
 }

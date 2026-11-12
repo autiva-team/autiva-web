@@ -1,0 +1,228 @@
+/* Detalle del vehículo — la ficha del expediente.
+   El banner resume el estado actual, las tarjetas desglosan. */
+
+.detalle-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+}
+
+.detalle-error-acciones {
+  margin-top: var(--esp-4);
+}
+
+/* ---------- Banner del vehículo ---------- */
+
+.detalle-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-5);
+  position: relative;
+}
+
+.detalle-foto-grande {
+  width: 168px;
+  height: 118px;
+  object-fit: cover;
+  border-radius: var(--radio-md);
+  border: 1px solid var(--borde);
+  flex-shrink: 0;
+}
+
+.detalle-icono-grande {
+  width: 88px;
+  height: 88px;
+}
+
+.detalle-banner-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.detalle-estado-row {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: 0.88rem;
+}
+
+.detalle-estado-row strong {
+  font-weight: 700;
+}
+
+.detalle-banner-odometro {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  color: var(--texto);
+}
+
+.detalle-banner-odometro svg {
+  color: var(--texto-3);
+  flex-shrink: 0;
+}
+
+.detalle-banner-odometro span {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.detalle-banner-odometro small {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texto-3);
+  margin-left: 2px;
+}
+
+.detalle-badge {
+  align-self: flex-start;
+}
+
+/* ---------- Tarjetas de datos ---------- */
+
+.detalle-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.detalle-card h2 {
+  font-size: 1.1rem;
+}
+
+.detalle-resumen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+}
+
+.detalle-resumen-header h2 {
+  font-size: 1.1rem;
+}
+
+.detalle-resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--esp-4);
+}
+
+.detalle-stat-box {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  padding: var(--esp-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-md);
+  background: var(--superficie-2);
+}
+
+.detalle-stat-label {
+  display: block;
+  color: var(--texto-2);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+.detalle-stat-box strong {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-top: 2px;
+}
+
+.detalle-stat-box small {
+  display: block;
+  color: var(--texto-3);
+  font-size: var(--texto-xs);
+  margin-top: 2px;
+}
+
+.detalle-stat-skeleton {
+  display: block;
+  height: 92px;
+  border-radius: var(--radio-md);
+}
+
+/* ---------- Próximo recordatorio ---------- */
+
+.detalle-proximo-recordatorio {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  padding: var(--esp-4);
+  border: 1px solid var(--aviso-borde);
+  background: var(--aviso-suave);
+  border-radius: var(--radio-md);
+}
+
+.detalle-proximo-recordatorio .icono-tono {
+  width: 36px;
+  height: 36px;
+}
+
+.detalle-proximo-recordatorio span {
+  color: var(--aviso);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detalle-proximo-recordatorio strong {
+  display: block;
+  color: var(--texto);
+  font-size: 0.95rem;
+  margin-top: 1px;
+}
+
+.detalle-proximo-recordatorio p {
+  color: var(--aviso);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+/* ---------- Acciones ---------- */
+
+.detalle-acciones {
+  display: flex;
+  gap: var(--esp-3);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.detalle-acciones .odometro-edicion {
+  flex-basis: 100%;
+}
+
+/* ---------- Skeleton del banner ---------- */
+
+.detalle-skeleton-banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  padding: var(--esp-6);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .detalle-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detalle-foto-grande {
+    width: 100%;
+    height: 160px;
+  }
+
+  .detalle-acciones .btn {
+    width: 100%;
+  }
+}

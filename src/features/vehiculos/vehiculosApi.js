@@ -1,6 +1,5 @@
-﻿import { request } from '../../api/cliente'
+import { request } from '../../api/cliente'
 
-// Registra un vehiculo del usuario autenticado: POST /api/vehiculos
 export function registrarVehiculo({
   marca,
   modelo,
@@ -22,4 +21,27 @@ export function registrarVehiculo({
       fotoUrl: fotoUrl || null,
     }),
   })
+}
+
+export function listarVehiculos() {
+  return request('/api/vehiculos')
+}
+
+export function obtenerVehiculo(id) {
+  return request(`/api/vehiculos/${id}`)
+}
+
+export function marcarVehiculoActivo(id) {
+  return request(`/api/vehiculos/${id}/activo`, { method: 'PATCH' })
+}
+
+export function actualizarOdometro(id, odometroActual) {
+  return request(`/api/vehiculos/${id}/odometro`, {
+    method: 'PATCH',
+    body: JSON.stringify({ odometroActual }),
+  })
+}
+
+export function obtenerResumenVehiculo(id) {
+  return request(`/api/vehiculos/${id}/resumen`)
 }

@@ -27,6 +27,22 @@ jobs:
         with:
           fetch-depth: 0   # historial completo: SonarQube lo usa para detectar código nuevo
 
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # Las pruebas generan coverage/lcov.info, que SonarQube usa para medir la cobertura.
+      - name: Ejecutar pruebas con cobertura
+        run: npm run test:coverage
+
+      # La cobertura se mide sobre la lógica (.js). Los componentes visuales (.jsx),
+      # los estilos y el service worker se excluyen solo del cálculo de cobertura;
+      # el resto del análisis (bugs, vulnerabilidades, code smells) sí los revisa.
       - name: Analizar con SonarQube Cloud
         uses: SonarSource/sonarqube-scan-action@v5
         env:
@@ -36,4 +52,8 @@ jobs:
             -Dsonar.organization=autiva-team
             -Dsonar.projectKey=autiva-team_autiva-web
             -Dsonar.sources=src
-            -Dsonar.exclusions=**/node_modules/**,dist/**
+            -Dsonar.exclusions=**/node_modules/**,dist/**,coverage/**,**/*.test.js,src/test/**
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.test.js
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.coverage.exclusions=**/*.jsx,**/*.css,src/sw.js

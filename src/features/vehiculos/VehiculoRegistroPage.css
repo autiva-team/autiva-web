@@ -1,116 +1,41 @@
+/* Registro de vehículo — formulario centrado que usa el sistema
+   de formularios de index.css. Aquí solo lo específico de la foto. */
+
 .vehiculo-registro {
+}
+
+.formulario-card {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 720px;
-  margin: 0 auto;
+  gap: var(--esp-4);
 }
 
-.vehiculo-registro .page-head h2 {
-  margin: 0;
-  font-size: 1.5rem;
+/* Placas en mayúsculas, como en la placa física. */
+.input-placas {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-.vehiculo-registro .page-head p {
-  margin-top: 4px;
-  color: var(--color-secondary);
-  font-size: 0.85rem;
-}
-
-.vehiculo-registro .tarjeta {
-  padding: 22px;
-}
-
-.vehiculo-registro .form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.vehiculo-registro .form-grid .ancho-completo,
-.vehiculo-registro .form-grid .acciones,
-.vehiculo-registro .form-grid > .error,
-.vehiculo-registro .form-grid > .exito {
-  grid-column: 1 / -1;
-}
-
-.vehiculo-registro .acciones {
-  display: flex;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.vehiculo-registro .acciones button {
-  flex: 1;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-2));
-  transition: transform 0.12s ease, opacity 0.15s ease;
-}
-
-.vehiculo-registro .acciones button:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.vehiculo-registro .acciones .secundario {
-  background: #eef2f9;
-  color: var(--color-title);
-  border: 1px solid var(--color-border);
-}
-
-.vehiculo-registro .acciones button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.vehiculo-registro .exito {
-  color: var(--color-success);
-}
-
-.vehiculo-registro .ayuda {
-  color: var(--color-secondary);
-  font-size: 0.75rem;
-  font-weight: 400;
-}
-
+/* Vista previa de la foto: muestra lo que se va a guardar. */
 .foto-preview-contenedor {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
   align-items: flex-start;
+  gap: var(--esp-4);
+  flex-wrap: wrap;
+  padding: var(--esp-4);
+  border: 1px dashed var(--borde-fuerte);
+  border-radius: var(--radio-md);
+  background: var(--superficie-2);
 }
 
 .foto-preview {
-  width: 100%;
-  max-width: 260px;
-  aspect-ratio: 4 / 3;
+  width: 168px;
+  height: 118px;
   object-fit: cover;
-  border-radius: 14px;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 8px 20px rgba(37, 22, 58, 0.08);
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--borde);
 }
 
 .foto-quitar {
-  background: #eef2f9;
-  color: var(--color-title);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-@media (max-width: 640px) {
-  .vehiculo-registro .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .vehiculo-registro .tarjeta {
-    padding: 18px;
-  }
+  align-self: flex-end;
 }
