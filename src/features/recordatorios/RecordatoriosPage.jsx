@@ -81,6 +81,7 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
   const [recordatorios, setRecordatorios] = useState([])
   const [cargandoLista, setCargandoLista] = useState(false)
   const [errorLista, setErrorLista] = useState('')
+  const [servicioNoDisponible, setServicioNoDisponible] = useState(false)
   const [intento, setIntento] = useState(0)
   const [filtro, setFiltro] = useState('pendientes')
   const [modalAbierto, setModalAbierto] = useState(false)
@@ -99,6 +100,7 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
     const cargar = async () => {
     setCargandoLista(true)
     setErrorLista('')
+    setServicioNoDisponible(false)
     const peticion =
       vehiculoActualId === TODOS
         ? Promise.all([
@@ -111,7 +113,11 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
         if (vigente) setRecordatorios(Array.isArray(datos) ? datos : [])
       })
       .catch((err) => {
-        if (vigente) setErrorLista(mensajeError(err, 'cargar los recordatorios'))
+        if (vigente) {
+          setErrorLista(mensajeError(err, 'cargar los recordatorios'))
+          setRecordatorios([])
+          setServicioNoDisponible(err?.status === 404)
+        }
       })
       .finally(() => {
         if (vigente) setCargandoLista(false)
@@ -243,6 +249,10 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
     }
   }
 
+  const sinDatos = cargandoLista || Boolean(errorLista)
+  const cifra = (lista) => (sinDatos ? '—' : lista.length)
+  const textoCifra = (lista) => (sinDatos ? 'sin datos' : String(lista.length))
+
   const nombreVehiculo = (v) => [`${v.marca} ${v.modelo}`, v.placas].filter(Boolean).join(' · ')
 
   if (vehiculos.length === 0) {
@@ -285,37 +295,42 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
         </button>
       </EncabezadoPagina>
 
-      <section className="recordatorios-resumen" aria-label="Resumen de recordatorios">
+      <section
+        className={sinDatos ? 'recordatorios-resumen sin-datos' : 'recordatorios-resumen'}
+        aria-label="Resumen de recordatorios"
+        aria-busy={cargandoLista || undefined}
+      >
         <article className="recordatorio-stat">
           <span className="recordatorio-stat-icono tono-rojo" aria-hidden="true">
             <Icon name="alert" size={18} />
           </span>
           <span className="recordatorio-stat-label">Vencidos</span>
-          <strong className="cifra">{vencidos.length}</strong>
+          <strong className="cifra" aria-label={textoCifra(vencidos)}>{cifra(vencidos)}</strong>
         </article>
         <article className="recordatorio-stat">
           <span className="recordatorio-stat-icono tono-ambar" aria-hidden="true">
             <Icon name="reloj" size={18} />
           </span>
           <span className="recordatorio-stat-label">Próximos</span>
-          <strong className="cifra">{proximos.length}</strong>
+          <strong className="cifra" aria-label={textoCifra(proximos)}>{cifra(proximos)}</strong>
         </article>
         <article className="recordatorio-stat">
           <span className="recordatorio-stat-icono tono-azul" aria-hidden="true">
             <Icon name="bell" size={18} />
           </span>
           <span className="recordatorio-stat-label">Pendientes</span>
-          <strong className="cifra">{pendientes.length}</strong>
+          <strong className="cifra" aria-label={textoCifra(pendientes)}>{cifra(pendientes)}</strong>
         </article>
         <article className="recordatorio-stat">
           <span className="recordatorio-stat-icono tono-verde" aria-hidden="true">
             <Icon name="check-circulo" size={18} />
           </span>
           <span className="recordatorio-stat-label">Completados</span>
-          <strong className="cifra">{completados.length}</strong>
+          <strong className="cifra" aria-label={textoCifra(completados)}>{cifra(completados)}</strong>
         </article>
       </section>
 
+      {!errorLista && (
       <div className="recordatorios-filtros" role="group" aria-label="Mostrar recordatorios">
         {FILTROS.map((opcion) => (
           <button
@@ -329,6 +344,7 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
           </button>
         ))}
       </div>
+      )}
 
       {errorLista && (
         <Alerta
@@ -342,6 +358,9 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
           }
         >
           {errorLista}
+          {servicioNoDisponible && (
+            <> Mientras tanto puedes crear recordatorios nuevos; aparecerán en esta lista cuando el servicio esté disponible.</>
+          )}
         </Alerta>
       )}
 

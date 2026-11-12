@@ -149,7 +149,8 @@ export default function PrincipalPage({
         if (activo) setRecordatorios(Array.isArray(datos) ? datos : [])
       })
       .catch(() => {
-        if (activo) setRecordatorios([])
+        // null = no se pudo consultar (distinto de «no hay recordatorios»).
+        if (activo) setRecordatorios(null)
       })
     obtenerResumenVehiculo(vehiculoActivoId)
       .then((datos) => {
@@ -168,7 +169,8 @@ export default function PrincipalPage({
   // GET /api/vehiculos/{id}/cargas/rendimiento → gastoMesActual (combustible del mes).
   const gastoMes = numero(rendimiento?.gastoMesActual)
 
-  const recordatoriosVigentes = recordatorios
+  const recordatoriosNoDisponibles = recordatorios === null
+  const recordatoriosVigentes = (recordatorios || [])
     .filter((recordatorio) => recordatorio.estado !== 'concluido')
     .map((recordatorio) => ({ ...recordatorio, estadoUi: estadoRecordatorio(recordatorio) }))
   const alertas = recordatoriosVigentes.filter((recordatorio) =>
@@ -426,12 +428,14 @@ export default function PrincipalPage({
               </span>
               <span className="resumen-label">Seguro</span>
               <strong className="resumen-valor">
-                {seguro ? seguro.estadoUi.etiqueta : 'Sin registrar'}
+                {recordatoriosNoDisponibles ? '—' : seguro ? seguro.estadoUi.etiqueta : 'Sin registrar'}
               </strong>
               <span className="resumen-hint">
-                {seguro
-                  ? seguro.estadoUi.detalle
-                  : 'Crea un recordatorio con la fecha de vencimiento de tu póliza'}
+                {recordatoriosNoDisponibles
+                  ? 'No pudimos consultar tus recordatorios por ahora'
+                  : seguro
+                    ? seguro.estadoUi.detalle
+                    : 'Crea un recordatorio con la fecha de vencimiento de tu póliza'}
               </span>
               {seguro?.fechaLimite && <span className="resumen-fecha">{formatearFechaCorta(seguro.fechaLimite)}</span>}
             </button>
