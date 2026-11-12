@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Icon from '../../components/Icons'
+import { detalleVehiculo } from '../../utils/vehiculo'
 import EstadoVacio from '../../components/EstadoVacio'
 import { useAviso } from '../../components/Aviso'
 import './VehiculosPage.css'
@@ -104,9 +105,8 @@ export default function VehiculosPage({
                   <h2>
                     {activo.marca} {activo.modelo}
                   </h2>
-                  <p>
-                    {activo.placas} · {activo.anio} · {activo.color || 'Sin color'}
-                  </p>
+                  {/* Las placas ya aparecen en «Placas»: aquí solo año y color, si existen. */}
+                  {detalleVehiculo(activo, { sinPlacas: true }) && <p>{detalleVehiculo(activo, { sinPlacas: true })}</p>}
                 </div>
 
                 <div className="principal-datos">
@@ -212,9 +212,7 @@ export default function VehiculosPage({
                       <h3>
                         {vehiculo.marca} {vehiculo.modelo}
                       </h3>
-                      <p>
-                        {vehiculo.placas} · {vehiculo.color || 'Sin color'}
-                      </p>
+                      {detalleVehiculo(vehiculo) && <p>{detalleVehiculo(vehiculo)}</p>}
                       <strong>{odometroDe(vehiculo).toLocaleString('es-MX')} km</strong>
                     </div>
                     <div className="otro-acciones">

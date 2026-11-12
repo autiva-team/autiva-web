@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Icon from '../../components/Icons'
+import { anioVehiculo, nombreVehiculo } from '../../utils/vehiculo'
 import Modal from '../../components/Modal'
 import Alerta from '../../components/Alerta'
 import Campo from '../../components/Campo'
@@ -305,10 +306,12 @@ export default function PrincipalPage({
               </strong>
             </div>
             <div className="odometro-acciones">
-              <span className="badge">
-                <Icon name="car" size={14} />
-                {vehiculoActivo.anio}
-              </span>
+              {anioVehiculo(vehiculoActivo) && (
+                <span className="badge">
+                  <Icon name="car" size={14} />
+                  {anioVehiculo(vehiculoActivo)}
+                </span>
+              )}
               <button type="button" className="btn btn--secundario btn--sm" onClick={abrirModalOdometro}>
                 Actualizar odómetro
               </button>
@@ -499,7 +502,7 @@ export default function PrincipalPage({
       {modalOdometro && vehiculoActivo && (
         <Modal titulo="Actualizar odómetro" onCerrar={() => setModalOdometro(false)}>
           <p className="modal-texto">
-            {vehiculoActivo.marca} {vehiculoActivo.modelo} · {vehiculoActivo.placas}
+            {nombreVehiculo(vehiculoActivo)}
           </p>
           <form className="formulario" onSubmit={guardarOdometro} noValidate>
             <Campo
