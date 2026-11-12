@@ -2,6 +2,28 @@ import Icon from '../../components/Icons'
 import './PlaceholderPage.css'
 
 const contenido = {
+  gastos: {
+    titulo: 'Control de Gastos',
+    descripcion: 'Esta funcionalidad se encuentra en desarrollo próximamente ya que aún no cuenta con endpoints en el backend. Estará disponible en una futura actualización de Autiva.',
+    icon: 'wallet',
+    tono: 'azul',
+    puntos: [
+      'Registro y categorías de gastos vehiculares',
+      'Balance mensual y costo total de posesión',
+      'Sincronización directa con la API oficial',
+    ],
+  },
+  estadisticas: {
+    titulo: 'Estadísticas e Informes',
+    descripcion: 'Esta funcionalidad se encuentra en desarrollo próximamente ya que aún no cuenta con endpoints en el backend. Estará disponible en una futura actualización de Autiva.',
+    icon: 'chart',
+    tono: 'cian',
+    puntos: [
+      'Gráficas de consumo y rendimiento mensual',
+      'Comparativa de eficiencia entre períodos',
+      'Métricas consolidadas de tu expediente vehicular',
+    ],
+  },
   gasolina: {
     titulo: 'Gasolina',
     descripcion: 'Registra cada carga y descubre el rendimiento real de tu vehículo.',
@@ -16,39 +38,24 @@ const contenido = {
     tono: 'violeta',
     puntos: ['Servicios realizados', 'Próximo servicio', 'Alertas de cuidado'],
   },
-  gastos: {
-    titulo: 'Gastos',
-    descripcion: 'Visualiza en qué se va tu dinero y mantén tu presupuesto bajo control.',
-    icon: 'wallet',
-    tono: 'azul',
-    puntos: ['Gastos por categoría', 'Resumen mensual', 'Comparativo de costos'],
-  },
-  recordatorios: {
-    titulo: 'Recordatorios',
-    descripcion: 'Programa avisos para no olvidar trámites ni servicios.',
-    icon: 'bell',
-    tono: 'violeta',
-    puntos: ['Verificación y tenencia', 'Cambio de aceite', 'Notificaciones push'],
-  },
-  estadisticas: {
-    titulo: 'Estadísticas',
-    descripcion: 'Conoce la eficiencia de tu vehículo con datos claros y visuales.',
-    icon: 'chart',
-    tono: 'cian',
-    puntos: ['Kilómetros recorridos', 'Costo de operación', 'Tendencias mensuales'],
-  },
 }
 
 export default function PlaceholderPage({ seccion, onInicio }) {
-  const info = contenido[seccion] || contenido.gasolina
+  const info = contenido[seccion] || {
+    titulo: 'En desarrollo',
+    descripcion: 'Esta funcionalidad se encuentra en desarrollo próximamente.',
+    icon: 'spark',
+    tono: 'azul',
+    puntos: ['Próximamente disponible', 'En integración con la API'],
+  }
 
   return (
-    <div className="placeholder-page">
+    <div className="placeholder-page contenedor">
       <section className="placeholder-hero">
         <span className={`placeholder-icono tono-${info.tono}`}>
           <Icon name={info.icon} size={30} />
         </span>
-        <span className="placeholder-tag">Próximamente</span>
+        <span className="placeholder-tag">Desarrollo próximamente</span>
         <h2>{info.titulo}</h2>
         <p>{info.descripcion}</p>
       </section>

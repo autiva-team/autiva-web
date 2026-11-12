@@ -1,13 +1,7 @@
-.login {
-  display: flex;
-  flex-direction: column;
-}
+/* Inicio de sesión: los estilos de campos y botones vienen del sistema (index.css). */
 
-.login .formulario button[type='submit'] {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-2));
-}
-
-.login .error {
-  color: var(--color-danger);
-  font-size: 0.85rem;
+.auth-olvido {
+  margin: calc(var(--esp-2) * -1) 0 0;
+  text-align: right;
+  font-size: var(--texto-sm);
 }

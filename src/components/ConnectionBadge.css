@@ -1,0 +1,47 @@
+/* Indicador de conexión: discreto cuando hay red, claro cuando no. */
+
+.conexion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: var(--radio-pill);
+  background: var(--exito-suave);
+  border: 1px solid var(--exito-borde);
+  color: var(--exito);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.conexion-badge.offline {
+  background: var(--aviso-suave);
+  border-color: var(--aviso-borde);
+  color: var(--aviso);
+}
+
+.conexion-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* En móvil solo el punto para no saturar la barra. */
+@media (max-width: 480px) {
+  .conexion-badge {
+    font-size: 0;
+    gap: 0;
+    padding: 6px;
+  }
+
+  .conexion-badge::after {
+    content: none;
+  }
+
+  .conexion-badge .conexion-dot {
+    width: 9px;
+    height: 9px;
+  }
+}

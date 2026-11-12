@@ -72,11 +72,23 @@ const paths = {
       <path d="m13 6 6 6-6 6" />
     </>
   ),
+  'chevron-izquierda': (
+    <>
+      <path d="M19 12H5" />
+      <path d="m11 18-6-6 6-6" />
+    </>
+  ),
+  'chevron-derecha': (
+    <>
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </>
+  ),
   alert: (
     <>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 8v5" />
-      <path d="M12 16h.01" />
+      <path d="M12 3 2.5 20h19L12 3Z" />
+      <path d="M12 10v4" />
+      <path d="M12 17.5h.01" />
     </>
   ),
   camera: (
@@ -87,6 +99,189 @@ const paths = {
   ),
   spark: (
     <path d="m12 3 2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2L12 3Z" />
+  ),
+  close: (
+    <>
+      <path d="M6 6l12 12" />
+      <path d="M18 6 6 18" />
+    </>
+  ),
+  check: (
+    <path d="m4.5 12.5 5 5 10-11" />
+  ),
+  'check-circulo': (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8.5 12.5 2.5 2.5 4.5-5.5" />
+    </>
+  ),
+  'alerta-circulo': (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v5" />
+      <path d="M12 16h.01" />
+    </>
+  ),
+  'prohibido': (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m5.5 5.5 13 13" />
+    </>
+  ),
+  calendario: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
+    </>
+  ),
+  reloj: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
+  editar: (
+    <>
+      <path d="M4 20h4L20 8l-4-4L4 16v4Z" />
+      <path d="m14 6 4 4" />
+    </>
+  ),
+  papelera: (
+    <>
+      <path d="M4 7h16" />
+      <path d="M9 7V4h6v3" />
+      <path d="M6 7l1 13h10l1-13" />
+      <path d="M10 11v5" />
+      <path d="M14 11v5" />
+    </>
+  ),
+  descargar: (
+    <>
+      <path d="M12 4v11" />
+      <path d="m7 11 5 5 5-5" />
+      <path d="M4 20h16" />
+    </>
+  ),
+  'wifi-off': (
+    <>
+      <path d="M3 3l18 18" />
+      <path d="M9 9a5 5 0 0 0-3 1.5" />
+      <path d="M2 5.5A15 15 0 0 1 8 3" />
+      <path d="M16 3a15 15 0 0 1 6 2.5l-2 2.4A12 12 0 0 0 16 6" />
+      <path d="M12 19h.01" />
+    </>
+  ),
+  correo: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m4 7 8 6 8-6" />
+    </>
+  ),
+  llave: (
+    <>
+      <circle cx="8" cy="15" r="4" />
+      <path d="m11 12 8-8" />
+      <path d="m16 5 3 3" />
+      <path d="m13 8 3 3" />
+    </>
+  ),
+  ojo: (
+    <>
+      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </>
+  ),
+  'ojo-cerrado': (
+    <>
+      <path d="M2 12s3.5-6 10-6c2 0 3.7.6 5.2 1.5M22 12s-3.5 6-10 6c-2 0-3.7-.6-5.2-1.5" />
+      <path d="m3 3 18 18" />
+    </>
+  ),
+  refrescar: (
+    <>
+      <path d="M21 12a9 9 0 1 1-2.6-6.3" />
+      <path d="M21 3v6h-6" />
+    </>
+  ),
+  odometro: (
+    <>
+      <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" />
+      <path d="m12 12 4-3" />
+      <path d="M12 12h.01" />
+    </>
+  ),
+  documento: (
+    <>
+      <path d="M6 3h8l4 4v14H6V3Z" />
+      <path d="M14 3v4h4" />
+      <path d="M9 12h6" />
+      <path d="M9 16h6" />
+    </>
+  ),
+  buscar: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-4-4" />
+    </>
+  ),
+  subida: (
+    <>
+      <path d="M12 19V5" />
+      <path d="m6 11 6-6 6 6" />
+    </>
+  ),
+  sol: (
+    <>
+      <circle cx="12" cy="12" r="5" />
+      <path d="M12 1v2" />
+      <path d="M12 21v2" />
+      <path d="M4.22 4.22l1.42 1.42" />
+      <path d="M18.36 18.36l1.42 1.42" />
+      <path d="M1 12h2" />
+      <path d="M21 12h2" />
+      <path d="M4.22 19.78l1.42-1.42" />
+      <path d="M18.36 5.64l1.42-1.42" />
+    </>
+  ),
+  luna: (
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+  ),
+  menu: (
+    <>
+      <path d="M4 6h16" />
+      <path d="M4 12h16" />
+      <path d="M4 18h16" />
+    </>
+  ),
+  bajada: (
+    <>
+      <path d="M12 5v14" />
+      <path d="m6 13 6 6 6-6" />
+    </>
+  ),
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5" />
+      <path d="M12 8h.01" />
+    </>
+  ),
+  mas: (
+    <>
+      <circle cx="5" cy="12" r="1.2" />
+      <circle cx="12" cy="12" r="1.2" />
+      <circle cx="19" cy="12" r="1.2" />
+    </>
+  ),
+  cuadricula: (
+    <>
+      <rect x="4" y="4" width="7" height="7" rx="1.5" />
+      <rect x="13" y="4" width="7" height="7" rx="1.5" />
+      <rect x="4" y="13" width="7" height="7" rx="1.5" />
+      <rect x="13" y="13" width="7" height="7" rx="1.5" />
+    </>
   ),
 }
 
