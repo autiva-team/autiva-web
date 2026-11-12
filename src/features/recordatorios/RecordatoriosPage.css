@@ -574,3 +574,8 @@
   color: var(--primario);
   font-weight: 600;
 }
+
+/* Sin datos confiables (cargando o con error): contadores atenuados con «—». */
+.recordatorios-resumen.sin-datos .cifra {
+  color: var(--texto-3);
+}
