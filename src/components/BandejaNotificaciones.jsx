@@ -5,6 +5,7 @@ import Spinner from './Spinner'
 import Alerta from './Alerta'
 import { marcarNotificacionLeida, obtenerNotificaciones } from '../push/suscripcion'
 import { mensajeError } from '../utils/mensajes'
+import { FUNCIONES } from '../config/funciones'
 
 function fechaRelativa(iso) {
   const fecha = new Date(iso)
@@ -17,7 +18,28 @@ function fechaRelativa(iso) {
  * Abrir una notificación la marca como leída (PATCH .../leida).
  * Desde aquí también se activan o desactivan los avisos en este dispositivo.
  */
-export default function BandejaNotificaciones({ push, onCerrar, onCambioSinLeer }) {
+export default function BandejaNotificaciones(props) {
+  if (!FUNCIONES.notificacionesPush) {
+    return (
+      <Modal titulo="Notificaciones" onCerrar={props.onCerrar} className="bandeja">
+        <div className="bandeja-vacia">
+          <span className="proximamente-etiqueta">Próximamente</span>
+          <p>
+            Pronto recibirás aquí, y en tu teléfono, los avisos de tus recordatorios antes de que venzan.
+          </p>
+        </div>
+        <div className="modal-acciones">
+          <button type="button" className="btn btn--secundario" onClick={props.onCerrar}>
+            Entendido
+          </button>
+        </div>
+      </Modal>
+    )
+  }
+  return <BandejaConectada {...props} />
+}
+
+function BandejaConectada({ push, onCerrar, onCambioSinLeer }) {
   const [notificaciones, setNotificaciones] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')

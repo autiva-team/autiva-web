@@ -579,3 +579,23 @@
 .recordatorios-resumen.sin-datos .cifra {
   color: var(--texto-3);
 }
+
+/* Resumen con dos datos del servidor: pendientes y próximo vencimiento. */
+.recordatorios-resumen--dos {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.recordatorio-proximo-titulo {
+  font-size: var(--texto-lg);
+  font-weight: 650;
+  color: var(--texto);
+}
+
+.recordatorio-proximo-detalle {
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
+}
+
+.recordatorios-nota {
+  margin-top: var(--esp-4);
+}
