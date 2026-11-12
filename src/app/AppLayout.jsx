@@ -6,6 +6,7 @@ import Modal from '../components/Modal'
 import BandejaNotificaciones from '../components/BandejaNotificaciones'
 import FondoDinamico from '../components/FondoDinamico'
 import { obtenerNotificaciones } from '../push/suscripcion'
+import { FUNCIONES } from '../config/funciones'
 import { useTema } from '../context/TemaContext'
 import './AppLayout.css'
 
@@ -159,6 +160,7 @@ export default function AppLayout({
 
   // Contador de notificaciones sin leer (GET /api/push/notificaciones).
   useEffect(() => {
+    if (!FUNCIONES.notificacionesPush) return undefined
     let vigente = true
     obtenerNotificaciones()
       .then((datos) => {

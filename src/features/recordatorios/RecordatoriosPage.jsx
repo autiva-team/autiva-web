@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import Icon from '../../components/Icons'
-import ConfirmarDialogo from '../../components/ConfirmarDialogo'
 import Campo from '../../components/Campo'
 import Modal from '../../components/Modal'
 import Spinner from '../../components/Spinner'
@@ -9,27 +8,18 @@ import EstadoVacio from '../../components/EstadoVacio'
 import EncabezadoPagina from '../../components/EncabezadoPagina'
 import { useAviso } from '../../components/Aviso'
 import { enfocarPrimerError, mensajeError } from '../../utils/mensajes'
+import { nombreVehiculo } from '../../utils/vehiculo'
+import { obtenerResumenVehiculo } from '../vehiculos/vehiculosApi'
 import {
   CATEGORIAS_RECORDATORIO,
   TITULOS_SUGERIDOS,
   categoriaRecordatorio,
-  concluirRecordatorio,
   crearRecordatorioFecha,
   crearRecordatorioKilometraje,
   estadoRecordatorio,
-  listarRecordatoriosVehiculo,
-  listarTodosRecordatorios,
 } from './recordatoriosApi'
+import { calcularEstadoLocal, guardarRecordatorioCreado, leerRecordatoriosCreados } from './recordatoriosLocales'
 import './RecordatoriosPage.css'
-
-const TODOS = 'todos'
-
-const FILTROS = [
-  { id: 'pendientes', nombre: 'Pendientes' },
-  { id: 'atender', nombre: 'Por atender' },
-  { id: 'completados', nombre: 'Completados' },
-  { id: 'todos', nombre: 'Todos' },
-]
 
 const ORDEN_ESTADO = { vencido: 0, proximo: 1, vigente: 2, neutro: 3, hecho: 4 }
 
@@ -61,67 +51,59 @@ function formVacio(vehiculoPredeterminadoId = '') {
 }
 
 function detalleFecha(recordatorio) {
-  if (recordatorio.criterio === 'por_fecha') {
+  if (recordatorio.criterio === 'por_fecha' || (!recordatorio.criterio && recordatorio.fechaLimite)) {
     return recordatorio.fechaLimite ? `Vence el ${formatearFecha(recordatorio.fechaLimite)}` : 'Sin fecha definida'
   }
   return `Meta: ${Number(recordatorio.kmObjetivo || 0).toLocaleString('es-MX')} km`
 }
 
+function odometroDe(vehiculo) {
+  return Number(vehiculo?.odometroActual ?? vehiculo?.kilometrajeInicial ?? 0)
+}
+
 /**
- * Recordatorios conectados a la API:
- * - GET /api/vehiculos/{id}/recordatorios (un vehículo, todos los estados)
- * - GET /api/recordatorios (todos los vehículos)
- * - POST .../recordatorios/fecha | /kilometraje
- * - PATCH /api/recordatorios/{id}/concluir
+ * Recordatorios con los endpoints que publica la API:
+ * - GET  /api/vehiculos/{id}/resumen            → pendientes y próximo vencimiento
+ * - POST /api/vehiculos/{id}/recordatorios/fecha | /kilometraje → crear
+ * La respuesta de cada creación se guarda para mostrarla en la lista.
  */
 export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSeleccionarVehiculo }) {
-  const [vehiculoElegidoId, setVehiculoActualId] = useState(vehiculoId || '')
-  // Si no hay uno elegido (o los vehículos llegaron después), se usa el primero.
-  const vehiculoActualId = vehiculoElegidoId || vehiculos[0]?.id || ''
-  const [recordatorios, setRecordatorios] = useState([])
-  const [cargandoLista, setCargandoLista] = useState(false)
-  const [errorLista, setErrorLista] = useState('')
-  const [servicioNoDisponible, setServicioNoDisponible] = useState(false)
+  const [vehiculoElegidoId, setVehiculoElegidoId] = useState(vehiculoId || '')
+  const vehiculoActualId = vehiculoElegidoId || vehiculos.find((v) => v.esPrincipal)?.id || vehiculos[0]?.id || ''
+  const vehiculoActual = vehiculos.find((v) => v.id === vehiculoActualId) || null
+
+  const [resumen, setResumen] = useState(null)
+  const [cargandoResumen, setCargandoResumen] = useState(false)
+  const [errorResumen, setErrorResumen] = useState('')
   const [intento, setIntento] = useState(0)
-  const [filtro, setFiltro] = useState('pendientes')
+  const [creados, setCreados] = useState(() => leerRecordatoriosCreados())
+
   const [modalAbierto, setModalAbierto] = useState(false)
   const [form, setForm] = useState(() => formVacio(vehiculoActualId))
   const [errores, setErrores] = useState({})
   const [errorServidor, setErrorServidor] = useState('')
   const [guardando, setGuardando] = useState(false)
-  const [porConcluir, setPorConcluir] = useState(null)
-  const [concluyendo, setConcluyendo] = useState(false)
   const formRef = useRef(null)
   const { avisar } = useAviso()
 
+  // GET /api/vehiculos/{id}/resumen
   useEffect(() => {
     if (!vehiculoActualId) return undefined
     let vigente = true
     const cargar = async () => {
-    setCargandoLista(true)
-    setErrorLista('')
-    setServicioNoDisponible(false)
-    const peticion =
-      vehiculoActualId === TODOS
-        ? Promise.all([
-            listarTodosRecordatorios({ estado: 'pendiente' }),
-            listarTodosRecordatorios({ estado: 'concluido' }),
-          ]).then(([pendientes, concluidos]) => [...(pendientes || []), ...(concluidos || [])])
-        : listarRecordatoriosVehiculo(vehiculoActualId)
-    peticion
-      .then((datos) => {
-        if (vigente) setRecordatorios(Array.isArray(datos) ? datos : [])
-      })
-      .catch((err) => {
+      setCargandoResumen(true)
+      setErrorResumen('')
+      try {
+        const datos = await obtenerResumenVehiculo(vehiculoActualId)
+        if (vigente) setResumen(datos)
+      } catch (err) {
         if (vigente) {
-          setErrorLista(mensajeError(err, 'cargar los recordatorios'))
-          setRecordatorios([])
-          setServicioNoDisponible(err?.status === 404)
+          setResumen(null)
+          setErrorResumen(mensajeError(err, 'cargar el resumen de recordatorios'))
         }
-      })
-      .finally(() => {
-        if (vigente) setCargandoLista(false)
-      })
+      } finally {
+        if (vigente) setCargandoResumen(false)
+      }
     }
     void cargar()
     return () => {
@@ -131,8 +113,12 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
 
   const recargar = () => setIntento((n) => n + 1)
 
-  const registros = recordatorios
-    .map((recordatorio) => ({ ...recordatorio, estadoUi: estadoRecordatorio(recordatorio) }))
+  const lista = creados
+    .filter((r) => r.vehiculoId === vehiculoActualId)
+    .map((r) => {
+      const conEstado = calcularEstadoLocal(r, odometroDe(vehiculoActual))
+      return { ...conEstado, estadoUi: estadoRecordatorio(conEstado) }
+    })
     .sort((a, b) => {
       const ordenA = ORDEN_ESTADO[a.estadoUi.tono] ?? 9
       const ordenB = ORDEN_ESTADO[b.estadoUi.tono] ?? 9
@@ -140,26 +126,16 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
       return String(a.fechaLimite || '').localeCompare(String(b.fechaLimite || ''))
     })
 
-  const pendientes = registros.filter((r) => r.estado !== 'concluido')
-  const vencidos = pendientes.filter((r) => r.estadoUi.tono === 'vencido')
-  const proximos = pendientes.filter((r) => r.estadoUi.tono === 'proximo')
-  const completados = registros.filter((r) => r.estado === 'concluido')
-
-  const visibles = registros.filter((r) => {
-    if (filtro === 'pendientes') return r.estado !== 'concluido'
-    if (filtro === 'atender') return r.estado !== 'concluido' && ['vencido', 'proximo'].includes(r.estadoUi.tono)
-    if (filtro === 'completados') return r.estado === 'concluido'
-    return true
-  })
+  const totalPendientes = Number(resumen?.totalRecordatoriosPendientes ?? 0)
+  const proximo = resumen?.proximoRecordatorio || null
 
   const cambiarVehiculo = (id) => {
-    setVehiculoActualId(id)
-    if (id !== TODOS && onSeleccionarVehiculo) onSeleccionarVehiculo(id)
+    setVehiculoElegidoId(id)
+    onSeleccionarVehiculo?.(id)
   }
 
   const abrirModal = () => {
-    const predeterminado = vehiculoActualId === TODOS ? vehiculos[0]?.id || '' : vehiculoActualId
-    setForm(formVacio(predeterminado))
+    setForm(formVacio(vehiculoActualId))
     setErrores({})
     setErrorServidor('')
     setModalAbierto(true)
@@ -181,7 +157,7 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
     if (guardando) return
     const nuevos = {}
     const kilometraje = Number(form.kilometraje)
-    const vehiculoDestinoId = form.vehiculoId
+    const vehiculoDestinoId = form.vehiculoId || vehiculoActualId
     const vehiculoDestino = vehiculos.find((v) => v.id === vehiculoDestinoId)
     const anticipacion = Number(form.anticipacionDias) || 7
 
@@ -194,11 +170,11 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
       if (!form.fecha) nuevos.fecha = 'Elige la fecha límite del trámite o servicio.'
       else if (form.fecha < fechaHoy()) nuevos.fecha = 'La fecha ya pasó; elige hoy o una fecha futura.'
     } else {
-      const odometroBase = Number(vehiculoDestino?.odometroActual ?? vehiculoDestino?.kilometrajeInicial ?? 0)
+      const base = odometroDe(vehiculoDestino)
       if (form.kilometraje === '' || !Number.isInteger(kilometraje) || kilometraje <= 0) {
         nuevos.kilometraje = 'Escribe a qué kilometraje quieres el aviso, sin decimales (ej. 65000).'
-      } else if (kilometraje <= odometroBase) {
-        nuevos.kilometraje = `Debe ser mayor al kilometraje actual del vehículo (${odometroBase.toLocaleString('es-MX')} km).`
+      } else if (kilometraje <= base) {
+        nuevos.kilometraje = `Debe ser mayor al kilometraje actual del vehículo (${base.toLocaleString('es-MX')} km).`
       }
     }
 
@@ -217,13 +193,28 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
         anticipacionDias: anticipacion,
         pushPrioritaria: form.pushPrioritaria,
       }
-      if (form.tipo === 'fecha') {
-        await crearRecordatorioFecha(vehiculoDestinoId, { ...datos, fechaLimite: form.fecha })
-      } else {
-        await crearRecordatorioKilometraje(vehiculoDestinoId, { ...datos, kmObjetivo: kilometraje })
-      }
+      const creado =
+        form.tipo === 'fecha'
+          ? await crearRecordatorioFecha(vehiculoDestinoId, { ...datos, fechaLimite: form.fecha })
+          : await crearRecordatorioKilometraje(vehiculoDestinoId, { ...datos, kmObjetivo: kilometraje })
+
+      // La API responde con el recordatorio creado (RecordatorioResponse).
+      guardarRecordatorioCreado({
+        id: creado?.id,
+        vehiculoId: creado?.vehiculoId || vehiculoDestinoId,
+        tipo: creado?.tipo || form.categoria,
+        titulo: creado?.titulo || datos.titulo,
+        criterio: creado?.criterio || (form.tipo === 'fecha' ? 'por_fecha' : 'por_kilometraje'),
+        fechaLimite: creado?.fechaLimite ?? (form.tipo === 'fecha' ? form.fecha : null),
+        kmObjetivo: creado?.kmObjetivo ?? (form.tipo === 'fecha' ? null : kilometraje),
+        anticipacionDias: creado?.anticipacionDias ?? anticipacion,
+        pushPrioritaria: creado?.pushPrioritaria ?? form.pushPrioritaria,
+        estado: creado?.estado || 'pendiente',
+        creadoEn: creado?.creadoEn || new Date().toISOString(),
+      })
+      setCreados(leerRecordatoriosCreados())
       setModalAbierto(false)
-      setFiltro('pendientes')
+      if (vehiculoDestinoId !== vehiculoActualId) cambiarVehiculo(vehiculoDestinoId)
       recargar()
       avisar(`Recordatorio «${datos.titulo}» creado. Te avisaremos con ${anticipacion} días de anticipación.`)
     } catch (err) {
@@ -232,28 +223,6 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
       setGuardando(false)
     }
   }
-
-  const confirmarConcluir = async () => {
-    if (!porConcluir) return
-    setConcluyendo(true)
-    try {
-      await concluirRecordatorio(porConcluir.id)
-      setPorConcluir(null)
-      recargar()
-      avisar('Recordatorio concluido. Lo encontrarás en «Completados».')
-    } catch (err) {
-      setPorConcluir(null)
-      avisar(mensajeError(err, 'concluir el recordatorio'), 'error')
-    } finally {
-      setConcluyendo(false)
-    }
-  }
-
-  const sinDatos = cargandoLista || Boolean(errorLista)
-  const cifra = (lista) => (sinDatos ? '—' : lista.length)
-  const textoCifra = (lista) => (sinDatos ? 'sin datos' : String(lista.length))
-
-  const nombreVehiculo = (v) => [`${v.marca} ${v.modelo}`, v.placas].filter(Boolean).join(' · ')
 
   if (vehiculos.length === 0) {
     return (
@@ -268,189 +237,138 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
     )
   }
 
+  const sinDatos = cargandoResumen || Boolean(errorResumen)
+
   return (
     <div className="recordatorios-page contenedor">
       <EncabezadoPagina
         titulo="Recordatorios"
         descripcion="Seguro, verificación, tenencia y servicios: te avisamos antes de que venzan."
       >
-        <label className="mes-selector">
-          <span>Vehículo</span>
-          <select
-            className="selector-vehiculo"
-            value={vehiculoActualId}
-            onChange={(evento) => cambiarVehiculo(evento.target.value)}
-          >
-            {vehiculos.length > 1 && <option value={TODOS}>Todos mis vehículos</option>}
-            {vehiculos.map((vehiculo) => (
-              <option key={vehiculo.id} value={vehiculo.id}>
-                {nombreVehiculo(vehiculo)}
-              </option>
-            ))}
-          </select>
-        </label>
+        {vehiculos.length > 1 && (
+          <label className="mes-selector">
+            <span>Vehículo</span>
+            <select
+              className="selector-vehiculo"
+              value={vehiculoActualId}
+              onChange={(evento) => cambiarVehiculo(evento.target.value)}
+            >
+              {vehiculos.map((vehiculo) => (
+                <option key={vehiculo.id} value={vehiculo.id}>
+                  {nombreVehiculo(vehiculo)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <button type="button" className="btn btn--primario" onClick={abrirModal}>
           <Icon name="plus" size={18} />
           Nuevo recordatorio
         </button>
       </EncabezadoPagina>
 
+      {/* Resumen del servidor: GET /api/vehiculos/{id}/resumen */}
       <section
-        className={sinDatos ? 'recordatorios-resumen sin-datos' : 'recordatorios-resumen'}
+        className={sinDatos ? 'recordatorios-resumen recordatorios-resumen--dos sin-datos' : 'recordatorios-resumen recordatorios-resumen--dos'}
         aria-label="Resumen de recordatorios"
-        aria-busy={cargandoLista || undefined}
+        aria-busy={cargandoResumen || undefined}
       >
-        <article className="recordatorio-stat">
-          <span className="recordatorio-stat-icono tono-rojo" aria-hidden="true">
-            <Icon name="alert" size={18} />
-          </span>
-          <span className="recordatorio-stat-label">Vencidos</span>
-          <strong className="cifra" aria-label={textoCifra(vencidos)}>{cifra(vencidos)}</strong>
-        </article>
-        <article className="recordatorio-stat">
-          <span className="recordatorio-stat-icono tono-ambar" aria-hidden="true">
-            <Icon name="reloj" size={18} />
-          </span>
-          <span className="recordatorio-stat-label">Próximos</span>
-          <strong className="cifra" aria-label={textoCifra(proximos)}>{cifra(proximos)}</strong>
-        </article>
         <article className="recordatorio-stat">
           <span className="recordatorio-stat-icono tono-azul" aria-hidden="true">
             <Icon name="bell" size={18} />
           </span>
           <span className="recordatorio-stat-label">Pendientes</span>
-          <strong className="cifra" aria-label={textoCifra(pendientes)}>{cifra(pendientes)}</strong>
+          <strong className="cifra" aria-label={sinDatos ? 'sin datos' : String(totalPendientes)}>
+            {sinDatos ? '—' : totalPendientes}
+          </strong>
         </article>
-        <article className="recordatorio-stat">
-          <span className="recordatorio-stat-icono tono-verde" aria-hidden="true">
-            <Icon name="check-circulo" size={18} />
+        <article className="recordatorio-stat recordatorio-stat--proximo">
+          <span className="recordatorio-stat-icono tono-ambar" aria-hidden="true">
+            <Icon name="reloj" size={18} />
           </span>
-          <span className="recordatorio-stat-label">Completados</span>
-          <strong className="cifra" aria-label={textoCifra(completados)}>{cifra(completados)}</strong>
+          <span className="recordatorio-stat-label">Próximo vencimiento</span>
+          {sinDatos ? (
+            <strong className="cifra" aria-label="sin datos">—</strong>
+          ) : proximo ? (
+            <>
+              <strong className="recordatorio-proximo-titulo">{proximo.titulo}</strong>
+              <span className="recordatorio-proximo-detalle">{detalleFecha(proximo)}</span>
+            </>
+          ) : (
+            <strong className="recordatorio-proximo-titulo">Ninguno</strong>
+          )}
         </article>
       </section>
 
-      {!errorLista && (
-      <div className="recordatorios-filtros" role="group" aria-label="Mostrar recordatorios">
-        {FILTROS.map((opcion) => (
-          <button
-            key={opcion.id}
-            type="button"
-            className={filtro === opcion.id ? 'filtro-btn activo' : 'filtro-btn'}
-            onClick={() => setFiltro(opcion.id)}
-            aria-pressed={filtro === opcion.id}
-          >
-            {opcion.nombre}
-          </button>
-        ))}
-      </div>
-      )}
-
-      {errorLista && (
+      {errorResumen && (
         <Alerta
           tipo="error"
-          titulo="No pudimos cargar tus recordatorios"
+          titulo="No pudimos cargar el resumen"
           accion={
-            <button type="button" className="btn btn--secundario btn--sm" onClick={recargar} disabled={cargandoLista}>
+            <button type="button" className="btn btn--secundario btn--sm" onClick={recargar} disabled={cargandoResumen}>
               <Icon name="refrescar" size={16} />
               Reintentar
             </button>
           }
         >
-          {errorLista}
-          {servicioNoDisponible && (
-            <> Mientras tanto puedes crear recordatorios nuevos; aparecerán en esta lista cuando el servicio esté disponible.</>
-          )}
+          {errorResumen}
         </Alerta>
       )}
 
-      <p className="sr-only" role="status">
-        {cargandoLista
-          ? 'Cargando recordatorios…'
-          : `${visibles.length} recordatorio${visibles.length === 1 ? '' : 's'} en la vista actual.`}
-      </p>
+      <section className="seccion" aria-labelledby="titulo-creados">
+        <div className="seccion-head">
+          <h2 id="titulo-creados">Creados en este dispositivo</h2>
+          {lista.length > 0 && <span className="badge">{lista.length}</span>}
+        </div>
 
-      {cargandoLista ? (
-        <p className="estado-carga" aria-hidden="true">
-          <Spinner size={20} />
-          Cargando recordatorios…
+        {lista.length > 0 ? (
+          <ul className="recordatorios-lista">
+            {lista.map((recordatorio) => {
+              const categoria = categoriaRecordatorio(recordatorio.tipo)
+              return (
+                <li key={recordatorio.id} className={`recordatorio-card ${recordatorio.estadoUi.tono}`}>
+                  <span
+                    className="recordatorio-icono"
+                    style={{ background: `${categoria.color}1f`, color: categoria.color }}
+                    aria-hidden="true"
+                  >
+                    <Icon name={categoria.icon} size={20} />
+                  </span>
+                  <div className="recordatorio-info">
+                    <div className="recordatorio-titulo-row">
+                      <h3 className="recordatorio-titulo">{recordatorio.titulo}</h3>
+                      <span className={`recordatorio-badge ${recordatorio.estadoUi.tono}`}>
+                        {recordatorio.estadoUi.etiqueta}
+                      </span>
+                    </div>
+                    <p className="recordatorio-meta">
+                      {categoria.nombre} · {detalleFecha(recordatorio)}
+                      {recordatorio.pushPrioritaria && <span className="recordatorio-badge-prioridad">Prioritario</span>}
+                    </p>
+                    <p className="recordatorio-estado">{recordatorio.estadoUi.detalle}</p>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        ) : (
+          <EstadoVacio
+            icono="bell"
+            titulo="Aún no creas recordatorios aquí"
+            texto="Crea uno para el seguro, la verificación o el próximo servicio y aparecerá en esta lista."
+          >
+            <button type="button" className="btn btn--primario" onClick={abrirModal}>
+              <Icon name="plus" size={18} />
+              Nuevo recordatorio
+            </button>
+          </EstadoVacio>
+        )}
+
+        <p className="proximamente-linea recordatorios-nota">
+          <span className="nav-proximamente">Próximamente</span>
+          Ver todos tus recordatorios desde cualquier dispositivo y marcarlos como hechos.
         </p>
-      ) : errorLista ? null : visibles.length > 0 ? (
-        <ul className="recordatorios-lista">
-          {visibles.map((recordatorio) => {
-            const categoria = categoriaRecordatorio(recordatorio.tipo)
-            const concluido = recordatorio.estado === 'concluido'
-            return (
-              <li
-                key={recordatorio.id}
-                className={`recordatorio-card ${concluido ? 'hecho' : recordatorio.estadoUi.tono}`}
-              >
-                <span
-                  className="recordatorio-icono"
-                  style={{ background: `${categoria.color}1f`, color: categoria.color }}
-                  aria-hidden="true"
-                >
-                  <Icon name={categoria.icon} size={20} />
-                </span>
-
-                <div className="recordatorio-info">
-                  <div className="recordatorio-titulo-row">
-                    <h2 className="recordatorio-titulo">{recordatorio.titulo}</h2>
-                    <span className={`recordatorio-badge ${recordatorio.estadoUi.tono}`}>
-                      {recordatorio.estadoUi.etiqueta}
-                    </span>
-                  </div>
-                  <p className="recordatorio-meta">
-                    {categoria.nombre} · {detalleFecha(recordatorio)}
-                    {vehiculoActualId === TODOS && recordatorio.vehiculoModelo && (
-                      <> · {[recordatorio.vehiculoModelo, recordatorio.vehiculoPlacas].filter(Boolean).join(' ')}</>
-                    )}
-                    {recordatorio.pushPrioritaria && (
-                      <span className="recordatorio-badge-prioridad">Aviso al teléfono</span>
-                    )}
-                  </p>
-                  <p className="recordatorio-estado">{recordatorio.estadoUi.detalle}</p>
-                </div>
-
-                {!concluido && (
-                  <div className="recordatorio-acciones">
-                    <button
-                      type="button"
-                      className="btn btn--secundario btn--sm"
-                      onClick={() => setPorConcluir(recordatorio)}
-                      aria-label={`Marcar como hecho: ${recordatorio.titulo}`}
-                    >
-                      <Icon name="check" size={16} />
-                      Hecho
-                    </button>
-                  </div>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      ) : (
-        <EstadoVacio
-          icono={filtro === 'completados' ? 'check-circulo' : 'bell'}
-          titulo={
-            filtro === 'completados'
-              ? 'Aún no completas recordatorios'
-              : filtro === 'atender'
-                ? 'Nada urgente por ahora'
-                : 'Sin recordatorios pendientes'
-          }
-          texto={
-            filtro === 'completados'
-              ? 'Cuando marques un recordatorio como hecho aparecerá aquí.'
-              : 'Crea un recordatorio para no olvidar trámites y servicios de tu vehículo.'
-          }
-        >
-          <button type="button" className="btn btn--primario" onClick={abrirModal}>
-            <Icon name="plus" size={18} />
-            Nuevo recordatorio
-          </button>
-        </EstadoVacio>
-      )}
+      </section>
 
       {modalAbierto && (
         <Modal titulo="Nuevo recordatorio" onCerrar={() => (guardando ? null : setModalAbierto(false))}>
@@ -512,8 +430,8 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
                 etiqueta="Kilometraje meta"
                 sufijo="km"
                 ayuda={(() => {
-                  const v = vehiculos.find((x) => x.id === form.vehiculoId)
-                  return v ? `Actual: ${Number(v.odometroActual ?? v.kilometrajeInicial ?? 0).toLocaleString('es-MX')} km.` : undefined
+                  const v = vehiculos.find((x) => x.id === (form.vehiculoId || vehiculoActualId))
+                  return v ? `Actual: ${odometroDe(v).toLocaleString('es-MX')} km.` : undefined
                 })()}
                 error={errores.kilometraje}
               >
@@ -537,7 +455,7 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
                 checked={Boolean(form.pushPrioritaria)}
                 onChange={onChange}
               />
-              <span>Avisarme también con una notificación en el teléfono</span>
+              <span>Marcar como prioritario</span>
             </label>
 
             {errorServidor && (
@@ -557,19 +475,6 @@ export default function RecordatoriosPage({ vehiculos = [], vehiculoId, onSelecc
             </div>
           </form>
         </Modal>
-      )}
-
-      {porConcluir && (
-        <ConfirmarDialogo
-          titulo="¿Marcar como hecho?"
-          mensaje={`«${porConcluir.titulo}» pasará a Completados y ya no recibirás avisos de él.`}
-          textoConfirmar="Sí, ya lo hice"
-          textoCancelar="Todavía no"
-          textoProceso="Guardando…"
-          onConfirmar={confirmarConcluir}
-          onCancelar={() => setPorConcluir(null)}
-          cargando={concluyendo}
-        />
       )}
     </div>
   )
