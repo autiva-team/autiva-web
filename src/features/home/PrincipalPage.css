@@ -1,431 +1,363 @@
+/* ============================================================
+   Inicio — jerarquía:
+   1. Saludo + acción principal (lo que el usuario vino a hacer).
+   2. Aviso de pendientes (si existe).
+   3. Vehículo principal (dato más consultado: odómetro).
+   4. Resumen del mes.  5. Atajos de consulta.  6. Estado de la app.
+   ============================================================ */
+
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  animation: fade-up 0.35s ease both;
+  gap: var(--esp-6);
 }
 
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.dashboard > .seccion {
+  margin-top: var(--esp-2);
 }
+
+/* ---------- Saludo ---------- */
 
 .saludo {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
-  padding: 4px 2px;
+  gap: var(--esp-5) var(--esp-6);
+  flex-wrap: wrap;
 }
 
-.saludo-eyebrow {
-  color: var(--color-accent);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 4px;
-}
-
-.saludo h2 {
-  font-size: 1.6rem;
-  margin: 0;
+.saludo h1 {
+  font-size: var(--titulo-pagina);
   letter-spacing: -0.02em;
+  color: var(--primario);
 }
 
 .saludo-texto {
-  color: var(--color-secondary);
-  font-size: 0.9rem;
-  margin-top: 4px;
+  color: var(--texto-2);
+  margin-top: var(--esp-2);
+  max-width: 54ch;
 }
 
-.saludo-icono {
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
-  box-shadow: 0 10px 24px rgba(100, 102, 230, 0.3);
-  flex-shrink: 0;
+.saludo-acciones {
+  display: flex;
+  gap: var(--esp-3);
+  flex-wrap: wrap;
 }
 
-/* Vehículo activo */
+@media (max-width: 640px) {
+  .saludo-acciones {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-aviso .alerta-accion {
+  margin-top: var(--esp-3);
+}
+
+/* ---------- Vehículo principal ---------- */
+
 .vehiculo-activo {
-  background: linear-gradient(150deg, #ffffff 0%, #f2f7ff 60%, #eef4ff 100%);
-  border: 1px solid rgba(102, 158, 236, 0.22);
-  border-radius: 22px;
-  padding: 18px;
-  box-shadow: 0 14px 34px rgba(37, 22, 58, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+  overflow: hidden;
+}
+
+.vehiculo-foto-banner {
+  width: calc(100% + var(--esp-6) * 2);
+  height: 200px;
+  margin: calc(var(--esp-6) * -1) calc(var(--esp-6) * -1) 0;
+  object-fit: cover;
+  border-bottom: 1px solid var(--borde);
+  background: var(--superficie-2);
 }
 
 .vehiculo-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--esp-3);
 }
 
-.vehiculo-head h3 {
-  margin: 0;
-  font-size: 1.2rem;
+.vehiculo-head h2 {
+  font-size: var(--titulo-seccion);
+  overflow-wrap: anywhere;
 }
 
 .vehiculo-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 6px;
+  gap: var(--esp-2);
+  flex-wrap: wrap;
+  margin-top: var(--esp-2);
 }
 
 .placa {
-  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--color-secondary);
-  background: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 3px 8px;
-}
-
-.badge-activo {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--color-accent);
-  background: rgba(100, 102, 230, 0.12);
-  border-radius: 999px;
-  padding: 3px 9px;
-}
-
-.icon-button.suave {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  background: #fff;
-  color: var(--color-accent);
-  box-shadow: 0 4px 12px rgba(37, 22, 58, 0.08);
+  font-size: var(--texto-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  border: 1px solid var(--borde-control);
+  border-radius: var(--radio-xs);
+  background: var(--superficie);
+  color: var(--texto);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .odometro {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: #fff;
-  border: 1px solid var(--color-border);
+  gap: var(--esp-4);
+  flex-wrap: wrap;
+  padding: var(--esp-4) var(--esp-5);
+  border-radius: var(--radio-md);
+  background: var(--superficie-2);
 }
 
 .odometro-label {
   display: block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-secondary);
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  margin-bottom: 2px;
 }
 
 .odometro strong {
-  display: block;
-  margin-top: 2px;
-  font-size: 1.5rem;
-  color: var(--color-title);
-  letter-spacing: -0.03em;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .odometro strong small {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-secondary);
+  font-size: var(--texto-base);
+  font-weight: 500;
+  color: var(--texto-2);
+  margin-left: 2px;
 }
 
-.odometro-chip {
-  display: inline-flex;
+.odometro-acciones {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 10px;
-  background: rgba(103, 205, 241, 0.16);
-  color: #2a86a8;
-  font-size: 0.8rem;
-  font-weight: 700;
+  gap: var(--esp-3);
+  flex-wrap: wrap;
 }
 
 .inspeccion {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--color-border);
-  font-size: 0.82rem;
-  color: var(--color-secondary);
+  gap: var(--esp-2);
+  font-size: var(--texto-sm);
+  color: var(--texto-2);
 }
 
 .inspeccion strong {
-  margin-left: auto;
-  color: var(--color-success);
+  font-weight: 600;
 }
 
-.punto-verde {
-  width: 8px;
-  height: 8px;
+/* Puntos de estado: siempre acompañados de texto. */
+.punto-verde,
+.punto-amarillo {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: #2ecc71;
-  box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.16);
+  flex-shrink: 0;
 }
 
-/* Estado vacío */
-.vehiculo-vacio {
+.punto-verde { background: var(--exito-fill); }
+.punto-amarillo { background: var(--aviso-fill); }
+
+/* ---------- Resumen del mes ---------- */
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--esp-4);
+}
+
+.resumen-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   align-items: flex-start;
-  padding: 20px;
-  border-radius: 22px;
-  background: #fff;
-  border: 1px dashed rgba(102, 158, 236, 0.45);
+  gap: var(--esp-2);
+  text-align: left;
+  width: 100%;
 }
 
-.vacio-icono {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  display: grid;
-  place-items: center;
-  background: rgba(102, 158, 236, 0.14);
-  color: var(--color-primary);
+.resumen-card .icono-tono {
+  margin-bottom: var(--esp-1);
 }
 
-.vehiculo-vacio h3 {
-  margin: 0;
-  font-size: 1.05rem;
+.resumen-label {
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
+  font-weight: 500;
 }
 
-.vehiculo-vacio p {
-  margin-top: 4px;
-  color: var(--color-secondary);
-  font-size: 0.85rem;
-}
-
-/* Secciones y grid */
-.seccion-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.seccion-head h3 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.seccion-tag {
-  font-size: 0.7rem;
+.resumen-valor {
+  font-size: 1.625rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-accent);
+  letter-spacing: -0.02em;
+  color: var(--texto);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
 }
+
+.resumen-hint {
+  color: var(--texto-3);
+  font-size: var(--texto-sm);
+  line-height: 1.4;
+}
+
+.resumen-fecha {
+  color: var(--texto-3);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+.mini-barra {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radio-pill);
+  background: var(--superficie-3);
+  overflow: hidden;
+}
+
+.mini-barra span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radio-pill);
+  background: var(--exito-fill);
+}
+
+/* ---------- Atajos de consulta: lista compacta ---------- */
 
 .grid-acciones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--esp-3);
 }
 
 .accion-card {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  padding: 16px;
-  border-radius: 18px;
-  border: 1px solid var(--color-border);
-  background: #fff;
+  align-items: center;
+  gap: var(--esp-3);
+  width: 100%;
+  min-height: 72px;
+  padding: var(--esp-3) var(--esp-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-md);
+  background: var(--superficie);
+  color: var(--texto-3);
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 8px 22px rgba(37, 22, 58, 0.05);
-  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  transition: border-color var(--transicion-rapida), background-color var(--transicion-rapida);
 }
 
 .accion-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(102, 158, 236, 0.4);
-  box-shadow: 0 14px 30px rgba(37, 22, 58, 0.1);
+  border-color: var(--primario);
+  background: var(--primario-suave);
 }
 
-.accion-icono {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 6px;
-}
-
-.tono-azul {
-  background: rgba(102, 158, 236, 0.16);
-  color: #3c7ed6;
-}
-
-.tono-cian {
-  background: rgba(103, 205, 241, 0.2);
-  color: #2a9cc4;
-}
-
-.tono-violeta {
-  background: rgba(100, 102, 230, 0.14);
-  color: var(--color-accent);
+.accion-texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .accion-titulo {
-  font-weight: 700;
-  color: var(--color-title);
-  font-size: 0.92rem;
+  color: var(--texto);
+  font-weight: 600;
+  font-size: var(--texto-base);
 }
 
 .accion-subtitulo {
-  color: var(--color-secondary);
-  font-size: 0.76rem;
-  line-height: 1.3;
+  color: var(--texto-3);
+  font-size: var(--texto-sm);
+  line-height: 1.35;
 }
 
-/* Seguro */
-.seguro-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #25163a, #3a2a58);
-  color: #fff;
-  box-shadow: 0 16px 34px rgba(37, 22, 58, 0.25);
-}
+/* ---------- Estado de la app ---------- */
 
-.seguro-icono {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
+.pie-dashboard {
   display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.12);
-  color: #9fd3ff;
-  flex-shrink: 0;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--esp-4);
 }
 
-.seguro-card h3 {
-  margin: 0;
-  font-size: 0.95rem;
-  color: #fff;
-}
-
-.seguro-card p {
-  margin-top: 2px;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.68);
-}
-
-.seguro-btn {
-  margin-left: auto;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.8rem;
-  padding: 8px 14px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-@media (min-width: 640px) {
-  .grid-acciones {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .saludo h2 {
-    font-size: 1.9rem;
-  }
-}
-
-/* Foto del vehículo activo */
-.vehiculo-foto-banner {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 16px;
-  margin-bottom: 14px;
-  border: 1px solid rgba(102, 158, 236, 0.22);
-}
-
-/* Tarjeta de instalación */
+.sincronizacion-card,
 .instalar-card {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(102, 158, 236, 0.12), rgba(100, 102, 230, 0.1));
-  border: 1px solid rgba(102, 158, 236, 0.22);
+  align-items: flex-start;
+  gap: var(--esp-3);
+  padding: var(--esp-4) var(--esp-5);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-md);
+  background: var(--superficie);
 }
 
-.instalar-card h3 {
-  margin: 0;
-  font-size: 0.95rem;
+.sincronizacion-card .punto-verde,
+.sincronizacion-card .punto-amarillo {
+  margin-top: 7px;
 }
 
+.sincronizacion-card strong {
+  font-size: var(--texto-base);
+}
+
+.sincronizacion-card p,
 .instalar-card p {
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
   margin-top: 2px;
-  font-size: 0.78rem;
-  color: var(--color-secondary);
-  max-width: 360px;
 }
 
-.instalar-btn {
-  margin-left: auto;
-  border: none;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.8rem;
-  padding: 10px 14px;
-  border-radius: 10px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: transform 0.12s ease, opacity 0.15s ease;
+.instalar-card {
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.instalar-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
+.instalar-card > div {
+  flex: 1;
+  min-width: 180px;
 }
 
-.instalar-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
+.instalar-card h2 {
+  font-size: var(--texto-base);
+  font-weight: 650;
 }
 
-@media (min-width: 1000px) {
-  .dashboard {
-    gap: 24px;
+@media (max-width: 640px) {
+  .vehiculo-foto-banner {
+    width: calc(100% + var(--esp-4) * 2);
+    margin: calc(var(--esp-5) * -1) calc(var(--esp-4) * -1) 0;
+    height: 150px;
   }
 
-  .accion-card {
-    padding: 20px;
+  .odometro {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .vehiculo-activo {
-    padding: 22px;
+  .odometro-acciones .btn {
+    flex: 1;
+  }
+
+  .instalar-card .btn {
+    width: 100%;
+  }
+
+  .vehiculo-head .btn {
+    padding-inline: 8px;
   }
 }

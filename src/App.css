@@ -1,18 +1,9 @@
+/* Estilos residuales del componente App raíz.
+   El sistema de diseño vive en index.css. */
+
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(100, 102, 230, 0.12);
-  color: var(--color-accent);
-  font-size: 0.8rem;
-  font-weight: 600;
+  margin-bottom: var(--esp-3);
 }

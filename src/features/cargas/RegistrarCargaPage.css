@@ -1,0 +1,82 @@
+.registrar-carga-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+}
+
+/* Cálculo en vivo: retroalimentación inmediata mientras se escribe. */
+.carga-live {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-6);
+  flex-wrap: wrap;
+  padding: var(--esp-4);
+  border-radius: var(--radio-md);
+  background: var(--primario-suave);
+  border: 1px solid var(--primario-borde);
+}
+
+.carga-live > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.carga-live small {
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
+  font-weight: 500;
+}
+
+.carga-live strong {
+  color: var(--texto);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+}
+
+.carga-live-nota {
+  flex-basis: 100%;
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
+}
+
+/* Resultado del registro: confirma con los datos calculados. */
+.carga-resultado {
+  background: var(--exito-suave);
+  border: 1px solid var(--exito-borde);
+  border-left: 4px solid var(--exito);
+  border-radius: var(--radio-md);
+  padding: var(--esp-5);
+}
+
+.carga-resultado h2 {
+  margin: 0 0 var(--esp-3);
+  font-size: var(--texto-lg);
+  color: var(--exito);
+}
+
+.carga-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--esp-3);
+  margin: 0;
+}
+
+.carga-datos div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.carga-datos dt {
+  font-size: var(--texto-sm);
+  color: var(--texto-2);
+}
+
+.carga-datos dd {
+  margin: 0;
+  color: var(--texto);
+  font-size: var(--texto-base);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}

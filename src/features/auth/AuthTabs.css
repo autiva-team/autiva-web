@@ -1,0 +1,36 @@
+/* Selector «Iniciar sesión / Crear cuenta»: ayuda a aprender que
+   ambas opciones están aquí mismo. */
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: var(--superficie-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-md);
+  margin-bottom: var(--esp-6);
+}
+
+.auth-tab {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-tab:hover:not(.activo) {
+  color: var(--texto);
+  background: var(--superficie-3);
+}
+
+.auth-tab.activo {
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: var(--sombra-1);
+  cursor: default;
+}
