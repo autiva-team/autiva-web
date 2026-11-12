@@ -231,8 +231,8 @@ function Aplicacion() {
     localStorage.setItem(USUARIO_KEY, JSON.stringify(info))
     setUsuario(info)
     setVista('principal')
-    cargarVehiculos()
-    cargarHome()
+    void cargarVehiculos()
+    void cargarHome()
     // Envía lo capturado sin conexión que quedó pendiente antes de iniciar sesión.
     sincronizarEnSegundoPlano()
   }
@@ -261,7 +261,7 @@ function Aplicacion() {
   }
 
   const handleVehiculoRegistrado = (datos) => {
-    cargarVehiculos()
+    void cargarVehiculos()
     avisar(`${datos.marca} ${datos.modelo} se agregó a tu expediente.`)
     navegar('vehiculos')
   }

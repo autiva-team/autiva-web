@@ -70,10 +70,17 @@ export default function Modal({ titulo, onCerrar, children, className = '' }) {
   }, [])
 
   return (
-    <div
-      className="modal-overlay"
-      onClick={() => onCerrarRef.current()}
-    >
+    <div className="modal-overlay">
+      {/* Fondo: botón nativo que cierra el diálogo al tocar fuera.
+          Queda fuera del orden de tabulación; con teclado se usa Escape
+          o el botón «Cerrar diálogo». */}
+      <button
+        type="button"
+        className="modal-fondo"
+        aria-label="Cerrar diálogo"
+        tabIndex={-1}
+        onClick={() => onCerrarRef.current()}
+      />
       <div
         ref={tarjetaRef}
         role="dialog"
@@ -81,7 +88,6 @@ export default function Modal({ titulo, onCerrar, children, className = '' }) {
         aria-labelledby={idTitulo}
         tabIndex={-1}
         className={`modal-card ${className}`}
-        onClick={(evento) => evento.stopPropagation()}
       >
         <div className="modal-head">
           <h2 id={idTitulo}>{titulo}</h2>
