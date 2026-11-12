@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { desuscribirPush, obtenerSuscripcionActual, pushCompatible, suscribirPush } from './suscripcion'
+import { desuscribirPush, obtenerClavePublicaVapid, obtenerSuscripcionActual, pushCompatible, suscribirPush } from './suscripcion'
 import { mensajeError } from '../utils/mensajes'
+import { FUNCIONES } from '../config/funciones'
 
 /**
  * Estado de las notificaciones push de este dispositivo.
@@ -13,6 +14,8 @@ export function usePush() {
   const [activa, setActiva] = useState(false)
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState(false)
+  // null = aún no se sabe; false = el servidor no tiene clave VAPID configurada.
+  const [servidorListo, setServidorListo] = useState(null)
 
   useEffect(() => {
     let vigente = true
@@ -21,6 +24,16 @@ export function usePush() {
         if (vigente) setActiva(Boolean(suscripcion))
       })
       .catch(() => {})
+    if (FUNCIONES.notificacionesPush) {
+      // GET /api/push/clave-publica: sin clave no se puede suscribir el dispositivo.
+      obtenerClavePublicaVapid()
+        .then((clave) => {
+          if (vigente) setServidorListo(Boolean(clave))
+        })
+        .catch(() => {
+          if (vigente) setServidorListo(false)
+        })
+    }
     return () => {
       vigente = false
     }
@@ -60,5 +73,5 @@ export function usePush() {
 
   const limpiar = useCallback(() => setMensaje(''), [])
 
-  return { compatible: pushCompatible(), activa, activar, desactivar, cargando, mensaje, error, limpiar }
+  return { compatible: pushCompatible(), servidorListo, activa, activar, desactivar, cargando, mensaje, error, limpiar }
 }
