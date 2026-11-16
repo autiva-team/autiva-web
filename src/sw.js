@@ -20,10 +20,28 @@ registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html')))
 registerRoute(
   ({ url, request }) => request.method === 'GET' && url.pathname.startsWith('/api/'),
   new NetworkFirst({
-    cacheName: 'api-get-cache',
+    cacheName: 'api-get-cache-v2',
+    plugins: [{
+      // Workbox no debe reutilizar la respuesta de otro JWT al trabajar offline.
+      cacheKeyWillBeUsed: async ({ request }) => {
+        const token = request.headers.get('Authorization') || 'publico'
+        let hash = 2166136261
+        for (const caracter of token) hash = Math.imul(hash ^ caracter.charCodeAt(0), 16777619)
+        const clave = new URL(request.url)
+        clave.searchParams.set('__sesion_cache', String(hash >>> 0))
+        return clave.href
+      },
+    }],
     networkTimeoutSeconds: 4,
   })
 )
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(caches.delete('api-get-cache'))
+})
+self.addEventListener('message', (event) => {
+  if (event.data?.tipo === 'AUTIVA_LIMPIAR_CACHE_API') event.waitUntil(caches.delete('api-get-cache-v2'))
+})
 
 // Push
 self.addEventListener('push', (event) => {

@@ -27,6 +27,10 @@ export function TemaProvider({ children }) {
     } catch {
       // Ignora errores de localStorage
     }
+    // La barra del sistema acompaña el tema elegido, incluso en la PWA instalada.
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+      meta.setAttribute('content', tema === 'dark' ? '#10152c' : '#edf0ff')
+    })
     const root = document.documentElement
     if (tema === 'dark') {
       root.classList.add('dark')

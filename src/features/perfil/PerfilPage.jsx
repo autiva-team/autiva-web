@@ -1,3 +1,4 @@
+import PerfilFormulario from './PerfilFormulario'
 import { useState } from 'react'
 import Icon from '../../components/Icons'
 import ConfirmarDialogo from '../../components/ConfirmarDialogo'
@@ -17,6 +18,7 @@ function iniciales(nombre = '') {
 
 export default function PerfilPage({
   usuario,
+  onUsuarioActualizado,
   onLogout,
   push,
 }) {
@@ -37,9 +39,6 @@ export default function PerfilPage({
     await onLogout()
   }
 
-  const expira = usuario?.expiraEn ? new Date(usuario.expiraEn) : null
-  const expiraValida = expira && !Number.isNaN(expira.getTime())
-
   return (
     <div className="perfil-page contenedor">
       <EncabezadoPagina titulo="Perfil" descripcion="Tus datos, tus preferencias y la sesión en este dispositivo." />
@@ -56,30 +55,10 @@ export default function PerfilPage({
         </div>
       </section>
 
-      <section className="perfil-bloque">
-        <h2>Datos de la cuenta</h2>
-        <div className="perfil-datos">
-          <div>
-            <span>Nombre</span>
-            <strong>{usuario?.nombre || '—'}</strong>
-          </div>
-          <div>
-            <span>Correo</span>
-            <strong>{usuario?.correo || '—'}</strong>
-          </div>
-          <div>
-            <span>Tipo de cuenta</span>
-            <strong>{usuario?.tipoCuenta || 'Personal'}</strong>
-          </div>
-          <div>
-            <span>Sesión válida hasta</span>
-            <strong>{expiraValida ? expira.toLocaleDateString('es-MX') : 'Activa'}</strong>
-          </div>
-        </div>
-      </section>
+      <PerfilFormulario onUsuarioActualizado={onUsuarioActualizado} push={push} />
 
       <section className="perfil-bloque">
-        <h2>Preferencias</h2>
+        <h2>Este dispositivo</h2>
 
         <button
           type="button"
@@ -97,9 +76,9 @@ export default function PerfilPage({
             <strong>Avisos en este dispositivo</strong>
             <small>
               {!FUNCIONES.notificacionesPush
-                ? 'Próximamente: avisos en tu teléfono antes de cada vencimiento.'
+                ? 'Los avisos no están habilitados.'
                 : push?.servidorListo === false
-                  ? 'Próximamente: el servidor está terminando la configuración de avisos.'
+                  ? 'Los avisos no están disponibles por el momento.'
                   : push?.servidorListo == null
                     ? 'Comprobando disponibilidad…'
                 : !push?.compatible

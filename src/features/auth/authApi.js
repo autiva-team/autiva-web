@@ -22,3 +22,10 @@ export function cerrarSesion() {
     method: 'POST',
   })
 }
+export function recuperarContrasena(correo) {
+  return request('/api/auth/recuperar-contrasena', { method: 'POST', body: JSON.stringify({ correo }), sinAutenticacion: true })
+}
+
+export function restablecerContrasena(token, nuevaContrasena) {
+  return request('/api/auth/restablecer-contrasena', { method: 'POST', body: JSON.stringify({ token, nuevaContrasena }), sinAutenticacion: true })
+}

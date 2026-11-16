@@ -23,9 +23,9 @@ export default function BandejaNotificaciones(props) {
     return (
       <Modal titulo="Notificaciones" onCerrar={props.onCerrar} className="bandeja">
         <div className="bandeja-vacia">
-          <span className="proximamente-etiqueta">Próximamente</span>
+
           <p>
-            Pronto recibirás aquí, y en tu teléfono, los avisos de tus recordatorios antes de que venzan.
+            Los avisos no están habilitados por el momento. Consulta tus vencimientos en Recordatorios.
           </p>
         </div>
         <div className="modal-acciones">
@@ -94,8 +94,8 @@ function BandejaConectada({ push, onCerrar, onCambioSinLeer }) {
     <Modal titulo="Notificaciones" onCerrar={onCerrar} className="bandeja">
       {push.compatible && push.servidorListo === false && (
         <p className="bandeja-push bandeja-push--pendiente">
-          <span className="proximamente-etiqueta">Próximamente</span>
-          Los avisos en tu teléfono se activarán cuando el servidor termine su configuración. Mientras tanto, aquí verás tus notificaciones.
+
+          Los avisos en este dispositivo no están disponibles por el momento. Puedes consultar tus notificaciones aquí.
         </p>
       )}
 
