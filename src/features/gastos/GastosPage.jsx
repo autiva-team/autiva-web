@@ -39,7 +39,7 @@ function FormularioGasto({ vehiculoId, onCerrar, onGuardado }) {
       <Campo etiqueta="Monto" prefijo="$"><input name="monto" type="number" required min="0.01" step="0.01" /></Campo>
       <Campo etiqueta="Fecha"><input name="fecha" type="date" required defaultValue={fechaMexico()} max={fechaMexico()} /></Campo>
       <Campo etiqueta="Odómetro (km)" opcional><input name="odometro" type="number" min="0" step="1" /></Campo>
-      <div className="modal-acciones"><button type="button" className="btn btn--secundario" disabled={guardando} onClick={onCerrar}>Cancelar</button><button className="btn btn--primario" disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar gasto'}</button></div>
+      <div className="modal-acciones"><button type="button" className="btn btn--secundario" disabled={guardando} onClick={onCerrar}>Cancelar</button><button type="submit" className="btn btn--primario" disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar gasto'}</button></div>
     </form>
   </Modal>
 }
