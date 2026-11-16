@@ -58,14 +58,14 @@ export default function PerfilFormulario({ onUsuarioActualizado, push }) {
         <Campo etiqueta="Nombre"><input required maxLength={120} value={perfil.nombre} onChange={(e) => setPerfil({ ...perfil, nombre: e.target.value })} /></Campo>
         <Campo etiqueta="Correo"><input type="email" required maxLength={150} value={perfil.correo} onChange={(e) => setPerfil({ ...perfil, correo: e.target.value })} /></Campo>
         <p className="perfil-metadatos">{perfil.numeroVehiculos} {perfil.numeroVehiculos === 1 ? 'vehículo' : 'vehículos'} · Cuenta creada el {fechaUtc(perfil.creadoEn).toLocaleDateString('es-MX')}</p>
-        <button className="btn btn--primario" disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar perfil'}</button>
+        <button type="submit" className="btn btn--primario" disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar perfil'}</button>
       </form></section>
       <section className="perfil-bloque"><h2>Preferencias de la cuenta</h2><form onSubmit={(e) => guardar(e, false)}>
         <Campo etiqueta="Unidad de rendimiento"><select value={preferencias.unidadMedida} onChange={(e) => setPreferencias({ ...preferencias, unidadMedida: e.target.value })}><option value="km_l">Kilómetros por litro</option><option value="mpg">Millas por galón</option></select></Campo>
         {[['notificacionesPush', 'Permitir avisos de la cuenta'], ['respaldoNube', 'Preferir respaldo en la nube'], ['modoOffline', 'Preferir captura sin conexión']].map(([clave, texto]) => <label className="perfil-opcion" key={clave}><input type="checkbox" checked={preferencias[clave]} onChange={(e) => setPreferencias({ ...preferencias, [clave]: e.target.checked })} />{texto}</label>)}
         <p className="texto-secundario">Estas preferencias se guardan en tu cuenta. Para recibir avisos, activa también este dispositivo.</p>
         <p className="perfil-metadatos">Última sincronización: {preferencias.ultimaSincronizacion ? fechaUtc(preferencias.ultimaSincronizacion).toLocaleString('es-MX') : 'Sin sincronizaciones registradas'}</p>
-        <button className="btn btn--primario" disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar preferencias'}</button>
+        <button type="submit" className="btn btn--primario" disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar preferencias'}</button>
       </form></section>
     </>}
   </div>

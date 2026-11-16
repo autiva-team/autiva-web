@@ -40,6 +40,8 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(caches.delete('api-get-cache'))
 })
 self.addEventListener('message', (event) => {
+  // Solo las páginas del mismo origen pueden solicitar el borrado de la caché.
+  if (event.origin !== self.location.origin) return
   if (event.data?.tipo === 'AUTIVA_LIMPIAR_CACHE_API') event.waitUntil(caches.delete('api-get-cache-v2'))
 })
 

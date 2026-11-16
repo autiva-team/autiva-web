@@ -30,7 +30,7 @@ export default function FormularioEdicion({ titulo, campos, inicial, guardar, on
         </Campo>)}
         {children}
       </fieldset>
-      <div className="modal-acciones"><button type="button" className="btn btn--secundario" disabled={guardando} onClick={onCerrar}>Cancelar</button><button className="btn btn--primario" disabled={guardando || ocupado}>{guardando ? 'Guardando…' : 'Guardar cambios'}</button></div>
+      <div className="modal-acciones"><button type="button" className="btn btn--secundario" disabled={guardando} onClick={onCerrar}>Cancelar</button><button type="submit" className="btn btn--primario" disabled={guardando || ocupado}>{guardando ? 'Guardando…' : 'Guardar cambios'}</button></div>
     </form>
   </Modal>
 }

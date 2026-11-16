@@ -35,7 +35,7 @@ export default function RecuperarContrasenaPage({ onVolver, restablecer = false,
         <Campo etiqueta="Nueva contraseña" ayuda="Entre 8 y 72 caracteres"><input name="nuevaContrasena" type="password" autoComplete="new-password" required minLength={8} maxLength={72} /></Campo>
         <Campo etiqueta="Confirmar contraseña"><input name="confirmar" type="password" autoComplete="new-password" required minLength={8} maxLength={72} /></Campo>
       </> : <Campo etiqueta="Correo electrónico"><input name="correo" type="email" autoComplete="email" maxLength={150} required /></Campo>}
-      <button className="btn btn--primario btn--lg btn--bloque" disabled={cargando}>{cargando ? 'Enviando…' : restablecer ? 'Guardar contraseña' : 'Enviar enlace'}</button>
+      <button type="submit" className="btn btn--primario btn--lg btn--bloque" disabled={cargando}>{cargando ? 'Enviando…' : restablecer ? 'Guardar contraseña' : 'Enviar enlace'}</button>
     </form>}
     {restablecer && (invalido || error) && <button className="btn btn--secundario btn--bloque" onClick={onPedirOtro}>Pedir otro enlace</button>}
     <button className="btn btn--secundario btn--bloque" onClick={onVolver}>Volver a iniciar sesión</button>
