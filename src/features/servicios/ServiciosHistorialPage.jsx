@@ -1,3 +1,8 @@
+import TextoAnimado from '../../components/motion/TextoAnimado'
+import { useRecargaApi } from '../../api/useRecargaApi'
+import ServicioEdicion from './ServicioEdicion'
+import { eliminarServicio, obtenerProximoServicio } from './serviciosApi'
+import ConfirmarEliminacion from '../../components/ConfirmarEliminacion'
 import { useEffect, useState } from 'react'
 import { obtenerHistorialServicios, obtenerServicio } from './serviciosApi'
 import Modal from '../../components/Modal'
@@ -21,10 +26,14 @@ export default function ServiciosHistorialPage({
   onSeleccionarVehiculo,
   onRegistrarServicio,
 }) {
+  const revisionApi = useRecargaApi()
   const [vehiculoActual, setVehiculoActual] = useState(vehiculoId || vehiculos[0]?.id || '')
   const [pagina, setPagina] = useState(1)
   const [datos, setDatos] = useState(null)
   const [detalle, setDetalle] = useState(null)
+  const [edicion, setEdicion] = useState(null)
+  const [borrado, setBorrado] = useState(null)
+  const [proximo, setProximo] = useState(null)
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState('')
   const [intento, setIntento] = useState(0)
@@ -37,9 +46,10 @@ export default function ServiciosHistorialPage({
       setCargando(true)
       setError('')
       try {
-        const d = await obtenerHistorialServicios(vehiculoActual, pagina, 10)
+        const [d, avanceApi] = await Promise.all([obtenerHistorialServicios(vehiculoActual, pagina, 10), obtenerProximoServicio(vehiculoActual)])
         if (!activo) return
         setDatos(d)
+        setProximo(avanceApi)
       } catch (err) {
         if (!activo) return
         setError(mensajeError(err, 'cargar el historial de servicios'))
@@ -48,7 +58,7 @@ export default function ServiciosHistorialPage({
       }
     })()
     return () => { activo = false }
-  }, [vehiculoActual, pagina, intento])
+  }, [vehiculoActual, pagina, intento, revisionApi])
 
   const verDetalle = async (id) => {
     try {
@@ -66,22 +76,18 @@ export default function ServiciosHistorialPage({
   }
 
   const items = datos?.items || []
-  const vehiculoObjeto = vehiculos.find((vehiculo) => vehiculo.id === vehiculoActual) || null
-  const odometroActual = numero(vehiculoObjeto?.odometroActual ?? vehiculoObjeto?.kilometrajeInicial)
-  const ultimoServicio = items[0] || null
-  const metaProximoKm = numero(ultimoServicio?.metaProximoKm)
+  const odometroActual = numero(proximo?.odometroActual)
+  const ultimoServicio = proximo?.ultimoServicio
+  const metaProximoKm = numero(proximo?.metaKm)
   const kmServicio = numero(ultimoServicio?.kilometrajeServicio)
-  const avance =
-    metaProximoKm > kmServicio
-      ? Math.min(100, Math.max(0, ((odometroActual - kmServicio) / (metaProximoKm - kmServicio)) * 100))
-      : 0
-  const faltanKm = Math.max(0, metaProximoKm - odometroActual)
+  const avance = numero(proximo?.porcentajeAvance)
+  const faltanKm = numero(proximo?.kmRestantes)
 
   return (
     <div className="servicios-page contenedor">
       <section className="page-head">
         <div>
-          <h1>Historial de servicios</h1>
+          <h1><TextoAnimado texto="Historial de servicios" /></h1>
           <p>Mantenimiento y servicios realizados.</p>
         </div>
         <div className="page-head-acciones">
@@ -115,7 +121,7 @@ export default function ServiciosHistorialPage({
           </div>
           {ultimoServicio && (
             <span className="proximo-servicio-tag">
-              Último: {ultimoServicio.tipoServicio} · {ultimoServicio.fecha}
+              Último: {ultimoServicio.tipo} · {ultimoServicio.fecha}
             </span>
           )}
         </div>
@@ -125,11 +131,12 @@ export default function ServiciosHistorialPage({
             <div className="progreso-pista" aria-hidden="true">
               <span className="progreso-relleno" style={{ width: `${avance}%` }} />
             </div>
+            {proximo?.fechaEstimada && <p>Fecha estimada: {proximo.fechaEstimada} · {proximo.diasEstimados} días</p>}
             <div className="proximo-servicio-pie">
               <span>Odómetro actual: {odometroActual.toLocaleString('es-MX')} km</span>
-              <strong className={faltanKm === 0 ? 'texto-peligro' : ''}>
-                {faltanKm === 0
-                  ? 'Meta alcanzada, agenda el servicio'
+              <strong className={faltanKm <= 0 ? 'texto-peligro' : ''}>
+                {faltanKm <= 0
+                  ? `Meta alcanzada${faltanKm < 0 ? `: ${Math.abs(faltanKm).toLocaleString('es-MX')} km de atraso` : ''}, agenda el servicio`
                   : `Faltan ${faltanKm.toLocaleString('es-MX')} km`}
               </strong>
             </div>
@@ -215,6 +222,8 @@ export default function ServiciosHistorialPage({
         </EstadoVacio>
       )}
 
+      {edicion && <ServicioEdicion servicio={edicion} onCerrar={() => setEdicion(null)} onGuardado={() => { setEdicion(null); setIntento((n) => n + 1); avisar('Servicio actualizado.') }} />}
+      {borrado && <ConfirmarEliminacion titulo="¿Eliminar servicio?" mensaje="También se eliminarán sus recordatorios pendientes." eliminar={() => eliminarServicio(borrado.id)} onCerrar={() => setBorrado(null)} onEliminado={() => { setBorrado(null); setPagina(1); setIntento((n) => n + 1); avisar('Servicio eliminado.') }} />}
       {detalle && (
         <Modal titulo={'Servicio: ' + (detalle.tipoServicio || 'detalle')} onCerrar={() => setDetalle(null)}>
           <dl className="detalle-grid">
@@ -228,6 +237,8 @@ export default function ServiciosHistorialPage({
             {detalle.notas && <div className="ancho-completo"><dt>Notas</dt><dd>{detalle.notas}</dd></div>}
           </dl>
           <div className="modal-acciones">
+            <button className="btn btn--secundario" onClick={() => { setEdicion(detalle); setDetalle(null) }}>Editar</button>
+            <button className="btn btn--secundario" onClick={() => { setBorrado(detalle); setDetalle(null) }}>Eliminar</button>
             <button type="button" className="btn btn--secundario" onClick={() => setDetalle(null)}>
               Cerrar
             </button>

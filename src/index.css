@@ -2309,3 +2309,7 @@ body {
   position: relative;
   z-index: 1;
 }
+
+/* Los controles de edición conservan tamaño y foco en los diálogos. */
+.formulario-edicion .campo-control[type="checkbox"] { width:22px; height:22px; min-height:22px; padding:0; accent-color:var(--primario); cursor:pointer; }
+.formulario-edicion .modal-acciones { margin-top:20px; }

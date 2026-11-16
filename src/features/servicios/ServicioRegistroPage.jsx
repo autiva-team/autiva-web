@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { registrarServicio } from './serviciosApi'
-import { encolarServicio, esErrorDeRed } from '../../offline/syncQueue'
+import { capturarServicio } from '../../offline/syncQueue'
 import { obtenerVehiculo } from '../vehiculos/vehiculosApi'
 import Alerta from '../../components/Alerta'
 import Campo from '../../components/Campo'
@@ -13,8 +12,8 @@ const TIPOS_SERVICIO = [
   { id: 1, nombre: 'Cambio de aceite' },
   { id: 2, nombre: 'Frenos' },
   { id: 3, nombre: 'Llantas' },
-  { id: 4, nombre: 'Batería' },
-  { id: 5, nombre: 'Afinación' },
+  { id: 4, nombre: 'Afinación' },
+  { id: 5, nombre: 'Batería' },
   { id: 6, nombre: 'Otro' },
 ]
 
@@ -49,6 +48,7 @@ export default function ServicioRegistroPage({ vehiculoId, onVolver, onGuardado 
   const [exito, setExito] = useState('')
   const [cargando, setCargando] = useState(false)
   const formRef = useRef(null)
+  const registroId = useRef(crypto.randomUUID())
 
   useEffect(() => {
     if (!vehiculoId) return
@@ -101,6 +101,7 @@ export default function ServicioRegistroPage({ vehiculoId, onVolver, onGuardado 
     setCargando(true)
     try {
       const payload = {
+        id: registroId.current,
         tipoServicioId: Number(form.tipoServicioId),
         fecha: form.fecha,
         kilometrajeServicio: Number(form.kilometrajeServicio),
@@ -112,17 +113,8 @@ export default function ServicioRegistroPage({ vehiculoId, onVolver, onGuardado 
         notas: form.notas.trim() || null,
       }
 
-      let datos
-      let pendiente = false
-      // HU-018: sin conexión el servicio se guarda en IndexedDB y se envía después.
-      try {
-        if (!navigator.onLine) throw new Error('Sin conexión')
-        datos = await registrarServicio(vehiculoId, payload)
-      } catch (errorRegistro) {
-        if (!esErrorDeRed(errorRegistro)) throw errorRegistro
-        datos = await encolarServicio({ ...payload, vehiculoId })
-        pendiente = true
-      }
+      const { datos, pendiente } = await capturarServicio({ ...payload, vehiculoId })
+      registroId.current = crypto.randomUUID()
 
       if (onGuardado) {
         onGuardado(datos, false, pendiente)
@@ -216,11 +208,6 @@ export default function ServicioRegistroPage({ vehiculoId, onVolver, onGuardado 
               <Campo etiqueta="Notas" opcional ayuda="Máximo 500 caracteres." error={errores.notas} className="ancho-completo">
                 <textarea name="notas" value={form.notas} onChange={onChange} maxLength={500} rows={3} />
               </Campo>
-
-              <p className="ancho-completo proximamente-linea">
-                <span className="nav-proximamente">Próximamente</span>
-                Adjuntar foto o PDF del comprobante.
-              </p>
             </div>
           </details>
 

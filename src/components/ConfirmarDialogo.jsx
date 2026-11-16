@@ -20,7 +20,7 @@ export default function ConfirmarDialogo({
   const proceso = textoProceso || (peligro ? 'Eliminando…' : 'Procesando…')
   return (
     <Modal titulo={titulo} onCerrar={cargando ? () => {} : onCancelar} className="modal-confirmar">
-      <p className="modal-texto">{mensaje}</p>
+      <div className="modal-texto">{mensaje}</div>
       <div className="modal-acciones">
         <button
           type="button"

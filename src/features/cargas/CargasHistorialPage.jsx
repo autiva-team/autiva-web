@@ -1,3 +1,9 @@
+import TextoAnimado from '../../components/motion/TextoAnimado'
+import { useRecargaApi } from '../../api/useRecargaApi'
+import { fechaUtc } from '../../utils/fechas'
+import CargaEdicion from './CargaEdicion'
+import { eliminarCarga } from './cargasApi'
+import ConfirmarEliminacion from '../../components/ConfirmarEliminacion'
 import { useEffect, useState } from 'react'
 import { obtenerHistorialCargas, obtenerCarga, obtenerRendimiento } from './cargasApi'
 import Icon from '../../components/Icons'
@@ -49,6 +55,7 @@ export default function CargasHistorialPage({
   onRegistrarCarga,
   onEditarCarga,
 }) {
+  const revisionApi = useRecargaApi()
   const { avisar } = useAviso()
   const [vehiculoActual, setVehiculoActual] = useState(vehiculoId || vehiculos[0]?.id || '')
   const [pagina, setPagina] = useState(1)
@@ -56,6 +63,8 @@ export default function CargasHistorialPage({
   const [hasta, setHasta] = useState('')
   const [datos, setDatos] = useState(null)
   const [detalle, setDetalle] = useState(null)
+  const [edicion, setEdicion] = useState(null)
+  const [borrado, setBorrado] = useState(null)
   const [cargandoDetalle, setCargandoDetalle] = useState(false)
   const [rendimientoApi, setRendimientoApi] = useState(null)
   const [cargando, setCargando] = useState(false)
@@ -88,7 +97,7 @@ export default function CargasHistorialPage({
     return () => {
       activo = false
     }
-  }, [vehiculoActual, pagina, desde, hasta, intento])
+  }, [vehiculoActual, pagina, desde, hasta, intento, revisionApi])
 
   useEffect(() => {
     if (!vehiculoActual) return undefined
@@ -103,7 +112,7 @@ export default function CargasHistorialPage({
     return () => {
       activo = false
     }
-  }, [vehiculoActual])
+  }, [vehiculoActual, intento, revisionApi])
 
   const verDetalle = async (id) => {
     setCargandoDetalle(true)
@@ -145,7 +154,7 @@ export default function CargasHistorialPage({
       <section className="page-head">
         <div>
           <p className="eyebrow">Combustible</p>
-          <h1>Historial de cargas</h1>
+          <h1><TextoAnimado texto="Historial de cargas" /></h1>
           <p className="page-subtitulo">
             Cada carga suma al rendimiento de tu vehículo. Filtra por fecha o revisa el detalle.
           </p>
@@ -286,7 +295,7 @@ export default function CargasHistorialPage({
                     </span>
                     <div>
                       <h3>{carga.tipoCombustible}</h3>
-                      <p>{new Date(carga.fechaHora).toLocaleString('es-MX')}</p>
+                      <p>{fechaUtc(carga.fechaHora).toLocaleString('es-MX')}</p>
                     </div>
                   </div>
                   <div className="carga-head-acciones">
@@ -403,6 +412,8 @@ export default function CargasHistorialPage({
         </EstadoVacio>
       )}
 
+      {edicion && <CargaEdicion carga={edicion} onCerrar={() => setEdicion(null)} onGuardado={() => { setEdicion(null); setIntento((n) => n + 1); avisar('Carga actualizada.') }} />}
+      {borrado && <ConfirmarEliminacion titulo="¿Eliminar carga?" mensaje="Se eliminará la carga y se recalculará el rendimiento de las siguientes." eliminar={() => eliminarCarga(borrado.id)} onCerrar={() => setBorrado(null)} onEliminado={() => { setBorrado(null); setPagina(1); setIntento((n) => n + 1); avisar('Carga eliminada.') }} />}
       {detalle && (
         <Modal titulo="Detalle de carga" onCerrar={() => setDetalle(null)}>
           <div className="detalle-grid">
@@ -412,7 +423,7 @@ export default function CargasHistorialPage({
             </div>
             <div>
               <span>Fecha</span>
-              <strong>{new Date(detalle.fechaHora).toLocaleString('es-MX')}</strong>
+              <strong>{fechaUtc(detalle.fechaHora).toLocaleString('es-MX')}</strong>
             </div>
             <div>
               <span>Litros</span>
@@ -456,6 +467,10 @@ export default function CargasHistorialPage({
             )}
           </div>
           <div className="modal-acciones">
+            <button className="btn btn--secundario" onClick={() => { setEdicion(detalle); setDetalle(null) }}>Editar</button>
+            <button className="btn btn--secundario" onClick={() => { setBorrado(detalle); setDetalle(null) }}>Eliminar</button>
+            <button className="btn btn--secundario" onClick={() => { setEdicion(detalle); setDetalle(null) }}>Editar</button>
+            <button className="btn btn--secundario" onClick={() => { setBorrado(detalle); setDetalle(null) }}>Eliminar</button>
             <button type="button" className="secundario" onClick={() => setDetalle(null)}>
               Cerrar
             </button>

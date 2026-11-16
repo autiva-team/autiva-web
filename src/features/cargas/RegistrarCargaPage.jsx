@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { registrarCarga } from '../cargas/cargasApi'
-import { encolarCarga, esErrorDeRed } from '../../offline/syncQueue'
+import { capturarCarga } from '../../offline/syncQueue'
 import { obtenerVehiculo } from '../vehiculos/vehiculosApi'
 import Alerta from '../../components/Alerta'
 import Campo from '../../components/Campo'
@@ -38,6 +37,7 @@ export default function RegistrarCargaPage({ vehiculoId, onVolver, onGuardado })
   const [exito, setExito] = useState('')
   const [cargando, setCargando] = useState(false)
   const formRef = useRef(null)
+  const registroId = useRef(crypto.randomUUID())
 
   useEffect(() => {
     if (!vehiculoId) return
@@ -92,6 +92,7 @@ export default function RegistrarCargaPage({ vehiculoId, onVolver, onGuardado })
     setCargando(true)
     try {
       const payload = {
+        id: registroId.current,
         tipoCombustibleId: Number(form.tipoCombustibleId),
         litros: Number(form.litros),
         costoTotal: Number(form.costoTotal),
@@ -103,18 +104,10 @@ export default function RegistrarCargaPage({ vehiculoId, onVolver, onGuardado })
         notas: form.notas.trim() || null,
       }
 
-      // HU-018: sin conexión la carga se guarda en IndexedDB y se envía después.
-      let datos
-      try {
-        if (!navigator.onLine) throw new Error('Sin conexión')
-        datos = await registrarCarga(vehiculoId, payload)
-      } catch (errorRegistro) {
-        if (!esErrorDeRed(errorRegistro)) throw errorRegistro
-        const pendiente = await encolarCarga({ ...payload, vehiculoId })
-        if (onGuardado) {
-          onGuardado(pendiente, false, true)
-          return
-        }
+      const { datos, pendiente } = await capturarCarga({ ...payload, vehiculoId })
+      registroId.current = crypto.randomUUID()
+      if (pendiente) {
+        if (onGuardado) { onGuardado(datos, false, true); return }
         setExito('Sin conexión: la carga se guardó en tu dispositivo y se enviará al recuperar la conexión.')
         setForm(formVacio())
         return
@@ -274,10 +267,6 @@ export default function RegistrarCargaPage({ vehiculoId, onVolver, onGuardado })
 
                   <Campo etiqueta="Gasolinera" opcional error={errores.gasolinera}>
                     <input name="gasolinera" value={form.gasolinera} onChange={onChange} maxLength={100} />
-                  </Campo>
-
-                  <Campo etiqueta="Folio del ticket" opcional error={errores.folio}>
-                    <input name="folio" value={form.folio} onChange={onChange} maxLength={50} />
                   </Campo>
 
                   <Campo etiqueta="Notas" opcional ayuda="Máximo 300 caracteres." error={errores.notas} className="ancho-completo">

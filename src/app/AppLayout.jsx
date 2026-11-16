@@ -1,3 +1,4 @@
+import LogoMarca from '../components/LogoMarca'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Icon from '../components/Icons'
 import ConnectionBadge from '../components/ConnectionBadge'
@@ -30,7 +31,7 @@ const GRUPOS = [
     items: [
       { id: 'gasolina', label: 'Combustible', icon: 'fuel' },
       { id: 'mantenimiento', label: 'Mantenimiento', icon: 'wrench' },
-      { id: 'gastos', label: 'Gastos', icon: 'wallet', proximamente: true },
+      { id: 'gastos', label: 'Gastos', icon: 'wallet' },
     ],
   },
   {
@@ -38,7 +39,7 @@ const GRUPOS = [
     titulo: 'Planear y analizar',
     items: [
       { id: 'recordatorios', label: 'Recordatorios', icon: 'bell' },
-      { id: 'estadisticas', label: 'Estadísticas', icon: 'chart', proximamente: true },
+      { id: 'estadisticas', label: 'Estadísticas', icon: 'chart' },
     ],
   },
 ]
@@ -58,7 +59,7 @@ const TITULOS = {
 const ACCIONES_RAPIDAS = [
   { id: 'carga', label: 'Carga de combustible', detalle: 'Litros, costo y odómetro', icon: 'fuel' },
   { id: 'servicio', label: 'Servicio de mantenimiento', detalle: 'Taller, costo y próximo servicio', icon: 'wrench' },
-  { id: 'gasto', label: 'Gasto', detalle: 'Seguro, verificación, tenencia y más', icon: 'wallet', proximamente: true },
+  { id: 'gasto', label: 'Gasto', detalle: 'Lavado, peajes, trámites y otros pagos', icon: 'wallet' },
   { id: 'recordatorio', label: 'Recordatorio', detalle: 'Por fecha o por kilometraje', icon: 'bell' },
 ]
 
@@ -239,11 +240,10 @@ export default function AppLayout({
                     className={activo ? 'nav-item activo' : 'nav-item'}
                     onClick={() => navegarYCerrar(item.id)}
                     aria-current={activo ? 'page' : undefined}
-                    title={!enCajon && colapsado ? item.label + (item.proximamente ? ' (próximamente)' : '') : undefined}
+                    title={!enCajon && colapsado ? item.label : undefined}
                   >
                     <Icon name={item.icon} size={20} />
                     <span>{item.label}</span>
-                    {item.proximamente && <span className="nav-proximamente">Próximamente</span>}
                   </button>
                 </li>
               )
@@ -289,7 +289,7 @@ export default function AppLayout({
       {/* Barra lateral flotante (escritorio) */}
       <aside className="sidebar" id="menu-lateral" aria-label="Menú de Autiva">
         <div className="sidebar-brand">
-          <span className="brand-mark" aria-hidden="true">A</span>
+          <LogoMarca />
           <div>
             <strong>Autiva</strong>
             <span>Expediente vehicular</span>
@@ -324,7 +324,7 @@ export default function AppLayout({
             id="menu-movil"
           >
             <div className="sidebar-brand">
-              <span className="brand-mark" aria-hidden="true">A</span>
+              <LogoMarca />
               <div>
                 <strong>Autiva</strong>
                 <span>Expediente vehicular</span>
@@ -389,7 +389,7 @@ export default function AppLayout({
               </span>
             </button>
             <span className="topbar-marca" aria-hidden="true">
-              <span className="brand-mark brand-mark--sm">A</span>
+              <LogoMarca pequeno />
             </span>
             <p className="topbar-seccion">
               <span className="sr-only">Sección actual: </span>
@@ -479,8 +479,6 @@ export default function AppLayout({
                   type="button"
                   className="accion-rapida"
                   onClick={() => elegirAccion(accion.id)}
-                  disabled={accion.proximamente}
-                  aria-describedby={accion.proximamente ? 'nota-proximamente' : undefined}
                 >
                   <span className="icono-tono tono-azul" aria-hidden="true">
                     <Icon name={accion.icon} size={22} />
@@ -489,16 +487,11 @@ export default function AppLayout({
                     <strong>{accion.label}</strong>
                     <span>{accion.detalle}</span>
                   </span>
-                  {accion.proximamente ? (
-                    <span className="nav-proximamente">Próximamente</span>
-                  ) : (
-                    <Icon name="chevron-derecha" size={18} />
-                  )}
+                  <Icon name="chevron-derecha" size={18} />
                 </button>
               </li>
             ))}
           </ul>
-          <p id="nota-proximamente" className="sr-only">Esta opción estará disponible próximamente.</p>
         </Modal>
       )}
 

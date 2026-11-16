@@ -1,3 +1,4 @@
+import { useRecargaApi } from '../../api/useRecargaApi'
 import { useEffect, useState } from 'react'
 import Icon from '../../components/Icons'
 import ConfirmarDialogo from '../../components/ConfirmarDialogo'
@@ -7,7 +8,7 @@ import EstadoVacio from '../../components/EstadoVacio'
 import { useAviso } from '../../components/Aviso'
 import { mensajeError } from '../../utils/mensajes'
 import { concluirRecordatorio, estadoRecordatorio, listarRecordatoriosVehiculo, listarTodosRecordatorios } from './recordatoriosApi'
-import { ordenarPorUrgencia } from './recordatoriosUi'
+
 import EncabezadoRecordatorios, { RecordatoriosSinVehiculos, TODOS_LOS_VEHICULOS } from './EncabezadoRecordatorios'
 import FormularioRecordatorio from './FormularioRecordatorio'
 import TarjetaRecordatorio from './TarjetaRecordatorio'
@@ -47,6 +48,7 @@ function cargarLista(vehiculoId) {
 export default function RecordatoriosApiPage({ vehiculos = [], vehiculoId, onSeleccionarVehiculo }) {
   const [vehiculoElegidoId, setVehiculoElegidoId] = useState(vehiculoId || '')
   const vehiculoActualId = vehiculoElegidoId || vehiculos[0]?.id || ''
+  const revisionApi = useRecargaApi()
   const [recordatorios, setRecordatorios] = useState([])
   const [cargandoLista, setCargandoLista] = useState(false)
   const [errorLista, setErrorLista] = useState('')
@@ -79,13 +81,13 @@ export default function RecordatoriosApiPage({ vehiculos = [], vehiculoId, onSel
     return () => {
       vigente = false
     }
-  }, [vehiculoActualId, intento])
+  }, [vehiculoActualId, intento, revisionApi])
 
   const recargar = () => setIntento((n) => n + 1)
 
   const registros = recordatorios
     .map((recordatorio) => ({ ...recordatorio, estadoUi: estadoRecordatorio(recordatorio) }))
-    .sort(ordenarPorUrgencia)
+
   const pendientes = registros.filter((r) => r.estado !== 'concluido')
   const grupos = {
     vencidos: pendientes.filter((r) => r.estadoUi.tono === 'vencido'),
@@ -121,6 +123,7 @@ export default function RecordatoriosApiPage({ vehiculos = [], vehiculoId, onSel
       avisar('Recordatorio concluido. Lo encontrarás en «Completados».')
     } catch (err) {
       avisar(mensajeError(err, 'concluir el recordatorio'), 'error')
+      if (err.status === 404 || err.status === 409) recargar()
     } finally {
       setPorConcluir(null)
       setConcluyendo(false)
