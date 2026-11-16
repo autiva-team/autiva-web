@@ -14,6 +14,7 @@ export default function FondoDinamico({ variante = 'suave' }) {
       <span className="fondo-mancha fondo-mancha--menta" />
       <span className="fondo-mancha fondo-mancha--ambar" />
       <span className="fondo-reticula" />
+      <span className="fondo-brillo-ambiente" />
     </div>
   )
 }

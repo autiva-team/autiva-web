@@ -39,7 +39,7 @@ export default function ConnectionBadge() {
   const textoPendientes =
     pendientes === 1 ? '1 registro pendiente de enviar' : `${pendientes} registros pendientes de enviar`
 
-  let titulo = enLinea ? 'Tienes conexión a internet' : 'Sin conexión: tus cargas y servicios se guardan en el dispositivo'
+  let titulo = enLinea ? 'Tienes conexión a internet' : 'Sin conexión: tus vehículos, cargas y servicios se guardan en el dispositivo'
   if (pendientes > 0) titulo += `. ${textoPendientes}.`
 
   return (

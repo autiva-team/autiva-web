@@ -1,3 +1,4 @@
+import TextoAnimado from '../../components/motion/TextoAnimado'
 import { useState } from 'react'
 import Icon from '../../components/Icons'
 import { detalleVehiculo } from '../../utils/vehiculo'
@@ -54,7 +55,7 @@ export default function VehiculosPage({
       <section className="page-head">
         <div>
           <p className="eyebrow">Tu flota</p>
-          <h1>Mis vehículos</h1>
+          <h1><TextoAnimado texto="Mis vehículos" /></h1>
           <p className="page-subtitulo">
             {vehiculos.length > 0
               ? `${vehiculos.length} vehículo${vehiculos.length === 1 ? '' : 's'} en tu expediente. Elige uno para ver su historial completo.`
@@ -105,6 +106,7 @@ export default function VehiculosPage({
                   <h2>
                     {activo.marca} {activo.modelo}
                   </h2>
+                  {activo.pendienteSincronizacion && <span className="badge badge--aviso" role="status">{activo.errorSincronizacion || 'Pendiente de sincronizar'}</span>}
                   {/* Las placas ya aparecen en «Placas»: aquí solo año y color, si existen. */}
                   {detalleVehiculo(activo, { sinPlacas: true }) && <p>{detalleVehiculo(activo, { sinPlacas: true })}</p>}
                 </div>
@@ -212,6 +214,7 @@ export default function VehiculosPage({
                       <h3>
                         {vehiculo.marca} {vehiculo.modelo}
                       </h3>
+                      {vehiculo.pendienteSincronizacion && <span className="badge badge--aviso" role="status">{vehiculo.errorSincronizacion || 'Pendiente de sincronizar'}</span>}
                       {detalleVehiculo(vehiculo) && <p>{detalleVehiculo(vehiculo)}</p>}
                       <strong>{odometroDe(vehiculo).toLocaleString('es-MX')} km</strong>
                     </div>

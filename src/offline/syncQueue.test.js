@@ -25,6 +25,8 @@ beforeEach(async () => {
   localStorage.setItem('autiva_token', 'token-de-prueba')
   await db.cargasPendientes.clear()
   await db.serviciosPendientes.clear()
+  await db.vehiculosPendientes.clear()
+  await db.vehiculosVinculados.clear()
 })
 
 afterEach(() => {
@@ -87,7 +89,7 @@ describe('sincronizarPendientes', () => {
   it('envía el lote, borra lo enviado y reporta lo insertado por la API', async () => {
     const carga = await encolarCarga({ vehiculoId: 'v1' })
     const servicio = await encolarServicio({ vehiculoId: 'v1' })
-    request.mockResolvedValue({ cargasInsertadas: 1, serviciosInsertados: 0 })
+    request.mockResolvedValue({ cargasInsertadas: 1, serviciosInsertados: 0, cargasSincronizadasIds: [carga.id], serviciosSincronizadosIds: [servicio.id], fallidos: [] })
     const escucha = vi.fn()
     window.addEventListener(EVENTO_PENDIENTES, escucha)
 
@@ -100,15 +102,16 @@ describe('sincronizarPendientes', () => {
     const enviado = JSON.parse(opciones.body)
     expect(enviado.cargas.map((c) => c.id)).toEqual([carga.id])
     expect(enviado.servicios.map((s) => s.id)).toEqual([servicio.id])
-    expect(resultado).toEqual({ ok: true, sincronizados: 1 })
+    expect(resultado).toEqual({ ok: true, sincronizados: 2, fallidos: [] })
     expect(await contarPendientes()).toBe(0)
-    expect(escucha.mock.calls[0][0].detail).toEqual({ ok: true, sincronizados: 1 })
+    expect(escucha.mock.calls[0][0].detail).toEqual({ ok: true, sincronizados: 2, fallidos: [] })
   })
 
-  it('si la API no detalla, cuenta todo lo enviado', async () => {
+  it('conserva los registros si la API no confirma sus ids', async () => {
     await encolarCarga({ vehiculoId: 'v1' })
     request.mockResolvedValue(null)
-    expect(await sincronizarPendientes()).toEqual({ ok: true, sincronizados: 1 })
+    expect(await sincronizarPendientes()).toEqual({ ok: true, sincronizados: 0, fallidos: [] })
+    expect(await contarPendientes()).toBe(1)
   })
 
   it('conserva la cola si la API falla', async () => {
@@ -159,4 +162,52 @@ describe('sincronización en segundo plano', () => {
     window.dispatchEvent(new Event('online'))
     await vi.waitFor(() => expect(request).toHaveBeenCalledTimes(2))
   })
+})
+
+it('procesa éxito parcial y fallidos conservando los ids no confirmados', async () => {
+  const confirmada = await encolarCarga({ vehiculoId: 'v1' })
+  const fallida = await encolarCarga({ vehiculoId: 'v1' })
+  const sinConfirmar = await encolarServicio({ vehiculoId: 'v1' })
+  const fallidos = [{ id: fallida.id, tipo: 'carga', motivo: 'Los litros deben ser mayores a cero.' }]
+  request.mockResolvedValue({ cargasSincronizadasIds: [confirmada.id], serviciosSincronizadosIds: [], fallidos })
+  expect(await sincronizarPendientes()).toEqual({ ok: true, sincronizados: 1, fallidos })
+  expect(await db.cargasPendientes.count()).toBe(0)
+  expect(await db.serviciosPendientes.get(sinConfirmar.id)).toBeTruthy()
+})
+
+it('persiste la captura antes de enviar el lote y conserva el GUID en el detalle', async () => {
+  const { capturarCarga } = await import('./syncQueue')
+  request.mockImplementation(async (ruta, opciones) => {
+    if (ruta === '/api/sincronizacion') {
+      const enviada = JSON.parse(opciones.body).cargas[0]
+      expect(await db.cargasPendientes.get(enviada.id)).toBeTruthy()
+      return { cargasSincronizadasIds: [enviada.id], serviciosSincronizadosIds: [], fallidos: [] }
+    }
+    return { id: 'c1', litros: 30 }
+  })
+  const resultado = await capturarCarga({ id: 'c1', vehiculoId: 'v1', litros: 30 })
+  expect(resultado.pendiente).toBe(true)
+  await vi.waitFor(async () => expect(await contarPendientes()).toBe(0))
+  expect(request.mock.calls).toHaveLength(1)
+})
+
+it('conserva la captura offline sin intentar registrar por separado', async () => {
+  const { capturarServicio } = await import('./syncQueue')
+  enLinea(false)
+  const resultado = await capturarServicio({ id: 's1', vehiculoId: 'v1', costo: 100 })
+  expect(resultado.pendiente).toBe(true)
+  expect(await db.serviciosPendientes.get('s1')).toBeTruthy()
+  expect(request).not.toHaveBeenCalled()
+})
+
+it('la captura responde antes de que termine una sincronización lenta', async () => {
+  const { capturarCarga } = await import('./syncQueue')
+  let resolver
+  request.mockReturnValue(new Promise((r) => { resolver = r }))
+  const inicio = await capturarCarga({ id: 'lenta', vehiculoId: 'v1', litros: 10 })
+  expect(inicio.pendiente).toBe(true)
+  expect(await db.cargasPendientes.get('lenta')).toBeTruthy()
+  await vi.waitFor(() => expect(request).toHaveBeenCalledTimes(1))
+  resolver({ cargasSincronizadasIds: ['lenta'], serviciosSincronizadosIds: [], fallidos: [] })
+  await vi.waitFor(async () => expect(await contarPendientes()).toBe(0))
 })

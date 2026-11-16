@@ -174,10 +174,7 @@ export default function RecordatoriosLocalPage({ vehiculos = [], vehiculoId, onS
           />
         )}
 
-        <p className="proximamente-linea recordatorios-nota">
-          <span className="nav-proximamente">Próximamente</span>
-          Ver todos tus recordatorios desde cualquier dispositivo y marcarlos como hechos.
-        </p>
+        <p className="recordatorios-nota texto-secundario">Estos recordatorios se guardan en este dispositivo.</p>
       </section>
 
       {modalAbierto && (

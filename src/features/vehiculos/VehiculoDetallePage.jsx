@@ -1,3 +1,10 @@
+import TextoAnimado from '../../components/motion/TextoAnimado'
+import { useRecargaApi } from '../../api/useRecargaApi'
+import { fechaUtc } from '../../utils/fechas'
+import VehiculoEdicion from './VehiculoEdicion'
+import ConfirmarEliminacion from '../../components/ConfirmarEliminacion'
+import { eliminarVehiculo } from './vehiculosApi'
+import { quitarPendientesVehiculo } from '../../offline/syncQueue'
 import { useEffect, useState } from 'react'
 import { obtenerVehiculo, obtenerResumenVehiculo } from './vehiculosApi'
 import { anioVehiculo, colorVehiculo, detalleVehiculo } from '../../utils/vehiculo'
@@ -5,6 +12,7 @@ import Icon from '../../components/Icons'
 import Alerta from '../../components/Alerta'
 import { useAviso } from '../../components/Aviso'
 import './VehiculoDetallePage.css'
+import { eliminarFotoVehiculo } from './fotosVehiculos'
 
 export default function VehiculoDetallePage({
   vehiculoId,
@@ -13,9 +21,11 @@ export default function VehiculoDetallePage({
   onMarcarActivo,
   onActualizarOdometro,
   onRegistrarCarga,
-  onEditar,
+  onActualizado,
+  onEliminado,
   onIrARecordatorios,
 }) {
+  const revisionApi = useRecargaApi()
   const { avisar } = useAviso()
   const [vehiculo, setVehiculo] = useState(null)
   const [resumen, setResumen] = useState(null)
@@ -23,6 +33,8 @@ export default function VehiculoDetallePage({
   const [error, setError] = useState('')
   const [odometro, setOdometro] = useState('')
   const [editando, setEditando] = useState(false)
+  const [edicion, setEdicion] = useState(false)
+  const [borrado, setBorrado] = useState(false)
 
   useEffect(() => {
     if (!vehiculoId) return
@@ -43,7 +55,7 @@ export default function VehiculoDetallePage({
         setCargando(false)
       }
     })()
-  }, [vehiculoId])
+  }, [vehiculoId, revisionApi])
 
   if (cargando) {
     return (
@@ -79,7 +91,7 @@ export default function VehiculoDetallePage({
         <section className="page-head">
           <div>
             <p className="eyebrow">Expediente del vehículo</p>
-            <h1>Vehículo no disponible</h1>
+            <h1><TextoAnimado texto="Vehículo no disponible" /></h1>
           </div>
         </section>
         <Alerta tipo="error" titulo="No pudimos cargar este vehículo">
@@ -119,18 +131,15 @@ export default function VehiculoDetallePage({
       <section className="page-head">
         <div>
           <p className="eyebrow">Expediente del vehículo</p>
-          <h1>
-            {vehiculo.marca} {vehiculo.modelo}
-          </h1>
+          <h1><TextoAnimado texto={`${vehiculo.marca} ${vehiculo.modelo}`} /></h1>
           {detalleVehiculo(vehiculo) && <p className="page-subtitulo">{detalleVehiculo(vehiculo)}</p>}
         </div>
         <div className="page-head-acciones">
-          {onEditar && (
-            <button type="button" className="btn btn--secundario" onClick={() => onEditar(vehiculo.id)}>
+          <button type="button" className="btn btn--secundario" onClick={() => setEdicion(true)}>
               <Icon name="editar" size={16} />
               Editar
-            </button>
-          )}
+          </button>
+          <button className="btn btn--secundario" onClick={() => setBorrado(true)}>Eliminar vehículo</button>
           <button type="button" className="btn btn--fantasma" onClick={onVolver}>
             <Icon name="chevron-izquierda" size={16} />
             Volver
@@ -138,6 +147,8 @@ export default function VehiculoDetallePage({
         </div>
       </section>
 
+      {edicion && <VehiculoEdicion vehiculo={vehiculo} foto={foto} onCerrar={() => setEdicion(false)} onGuardado={(datos) => { setVehiculo(datos); setEdicion(false); onActualizado?.(); avisar('Se actualizó el vehículo con éxito.') }} />}
+      {borrado && <ConfirmarEliminacion titulo="¿Eliminar vehículo?" mensaje="El vehículo y todos sus registros dejarán de aparecer. Esta acción no se puede deshacer desde la aplicación." eliminar={async () => { await eliminarVehiculo(vehiculo.id); await quitarPendientesVehiculo(vehiculo.id); await eliminarFotoVehiculo(vehiculo.id); localStorage.removeItem('autiva_cargas_' + vehiculo.id) }} onCerrar={() => setBorrado(false)} onEliminado={() => { setBorrado(false); avisar('Se eliminó el vehículo con éxito.'); onEliminado?.() }} />}
       <section className="detalle-banner tarjeta">
         {foto ? (
           <img src={foto} alt={`Foto de ${vehiculo.marca} ${vehiculo.modelo}`} className="detalle-foto-grande" />
@@ -204,7 +215,7 @@ export default function VehiculoDetallePage({
           </div>
           <div>
             <span>Registrado</span>
-            <strong>{vehiculo.creadoEn ? new Date(vehiculo.creadoEn).toLocaleDateString('es-MX') : '—'}</strong>
+            <strong>{vehiculo.creadoEn ? fechaUtc(vehiculo.creadoEn).toLocaleDateString('es-MX') : '—'}</strong>
           </div>
         </div>
       </section>

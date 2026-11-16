@@ -2,6 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import './styles/featureStyles.js'
+import './styles/ios.css'
+import './styles/motion.css'
+import EfectosInterfaz from './components/motion/EfectosInterfaz'
 import { recargarAlActualizar } from './pwa/actualizacion'
 
 // Cuando se publica una versión nueva, el service worker la activa y la
@@ -11,5 +15,6 @@ recargarAlActualizar()
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
+    <EfectosInterfaz />
   </StrictMode>,
 )

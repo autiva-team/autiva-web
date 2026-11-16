@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { registrarVehiculo } from './vehiculosApi'
+import { encolarVehiculo } from '../../offline/vehiculosPendientes'
 import Alerta from '../../components/Alerta'
 import Spinner from '../../components/Spinner'
 import EncabezadoPagina from '../../components/EncabezadoPagina'
@@ -44,8 +44,8 @@ export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
       e.modelo = 'El modelo no puede superar los 50 caracteres.'
 
     if (!form.anio) e.anio = 'Escribe el año del modelo con 4 dígitos (ej. 2020).'
-    else if (!/^\d{4}$/.test(form.anio) || anio < 1900 || anio > 2100)
-      e.anio = 'Ingresa un año de 4 dígitos entre 1900 y 2100.'
+    else if (!/^\d{4}$/.test(form.anio) || anio < 1950 || anio > new Date().getFullYear() + 1)
+      e.anio = 'Ingresa un año de 4 dígitos desde 1950 hasta el próximo año.'
 
     if (!placas) e.placas = 'Escribe las placas tal como aparecen en el vehículo.'
     else if (placas.length > 15)
@@ -77,7 +77,7 @@ export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
 
     setCargando(true)
     try {
-      const datos = await registrarVehiculo({
+      const { datos } = await encolarVehiculo({
         marca: form.marca.trim(),
         modelo: form.modelo.trim(),
         anio: Number(form.anio),
@@ -239,11 +239,6 @@ export default function VehiculoRegistroPage({ onVolver, onRegistrado }) {
               </span>
             )}
           </label>
-
-          <p className="ancho-completo proximamente-linea">
-            <span className="nav-proximamente">Próximamente</span>
-            Agregar una foto de tu vehículo.
-          </p>
 
           {errorApi && (
             <Alerta tipo="error" titulo="No se registró el vehículo" className="ancho-completo">

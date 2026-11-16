@@ -1,3 +1,4 @@
+import TextoAnimado from './motion/TextoAnimado'
 import Icon from './Icons'
 
 /**
@@ -26,7 +27,7 @@ export default function EncabezadoPagina({
           </button>
         )}
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-        <h1 id={id}>{titulo}</h1>
+        <h1 id={id}><TextoAnimado texto={titulo} /></h1>
         {descripcion && <p className="page-subtitulo">{descripcion}</p>}
       </div>
       {children && <div className="page-head-acciones">{children}</div>}
