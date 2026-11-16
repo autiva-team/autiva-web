@@ -1,34 +1,39 @@
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { useRecargaApi } from './api/useRecargaApi'
+import { limpiarCacheApi } from './api/cliente'
 import {
   EVENTO_PENDIENTES,
   registrarSincronizacionAutomatica,
   sincronizarEnSegundoPlano,
 } from './offline/syncQueue'
 import LoginPage from './features/auth/LoginPage.jsx'
-import RegistroPage from './features/auth/RegistroPage.jsx'
-import RecuperarContrasenaPage from './features/auth/RecuperarContrasenaPage.jsx'
+const RegistroPage = lazy(() => import('./features/auth/RegistroPage.jsx'))
+const RecuperarContrasenaPage = lazy(() => import('./features/auth/RecuperarContrasenaPage.jsx'))
 import PrincipalPage from './features/home/PrincipalPage.jsx'
-import PlaceholderPage from './features/home/PlaceholderPage.jsx'
-import PerfilPage from './features/perfil/PerfilPage.jsx'
-import VehiculoRegistroPage from './features/vehiculos/VehiculoRegistroPage.jsx'
-import VehiculosPage from './features/vehiculos/VehiculosPage.jsx'
-import VehiculoDetallePage from './features/vehiculos/VehiculoDetallePage.jsx'
-import CargasHistorialPage from './features/cargas/CargasHistorialPage.jsx'
-import RegistrarCargaPage from './features/cargas/RegistrarCargaPage.jsx'
-import ServiciosHistorialPage from './features/servicios/ServiciosHistorialPage.jsx'
-import ServicioRegistroPage from './features/servicios/ServicioRegistroPage.jsx'
-import RecordatoriosPage from './features/recordatorios/RecordatoriosPage.jsx'
-import GastosPage from './features/gastos/GastosPage.jsx'
-import EstadisticasPage from './features/estadisticas/EstadisticasPage.jsx'
+const PlaceholderPage = lazy(() => import('./features/home/PlaceholderPage.jsx'))
+const PerfilPage = lazy(() => import('./features/perfil/PerfilPage.jsx'))
+const VehiculoRegistroPage = lazy(() => import('./features/vehiculos/VehiculoRegistroPage.jsx'))
+const VehiculosPage = lazy(() => import('./features/vehiculos/VehiculosPage.jsx'))
+const VehiculoDetallePage = lazy(() => import('./features/vehiculos/VehiculoDetallePage.jsx'))
+const CargasHistorialPage = lazy(() => import('./features/cargas/CargasHistorialPage.jsx'))
+const RegistrarCargaPage = lazy(() => import('./features/cargas/RegistrarCargaPage.jsx'))
+const ServiciosHistorialPage = lazy(() => import('./features/servicios/ServiciosHistorialPage.jsx'))
+const ServicioRegistroPage = lazy(() => import('./features/servicios/ServicioRegistroPage.jsx'))
+const RecordatoriosPage = lazy(() => import('./features/recordatorios/RecordatoriosPage.jsx'))
+const GastosPage = lazy(() => import('./features/gastos/GastosPage.jsx'))
+const EstadisticasPage = lazy(() => import('./features/estadisticas/EstadisticasPage.jsx'))
 import AppLayout from './app/AppLayout.jsx'
 import { AvisoProvider, useAviso } from './components/Aviso'
 import { TemaProvider } from './context/TemaContext'
 import { usePush } from './push/usePush'
 import { listarVehiculos, marcarVehiculoActivo, actualizarOdometro } from './features/vehiculos/vehiculosApi'
+import { obtenerPerfil } from './features/perfil/perfilApi'
 import { obtenerHome } from './features/home/homeApi'
 import { cerrarSesion } from './features/auth/authApi'
 import { mensajeError } from './utils/mensajes'
 import './App.css'
+import { EVENTO_FOTOS, leerFotosVehiculos } from './features/vehiculos/fotosVehiculos'
+import { cuentaActual } from './offline/cuenta'
 
 const USUARIO_KEY = 'autiva_usuario'
 const TOKEN_KEY = 'autiva_token'
@@ -48,7 +53,7 @@ function leerUsuario() {
 
 function leerVehiculos() {
   try {
-    const raw = localStorage.getItem(VEHICULOS_KEY)
+    const raw = localStorage.getItem(VEHICULOS_CACHE_KEY) || localStorage.getItem(VEHICULOS_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed)) return parsed
@@ -75,12 +80,14 @@ function leerFotos() {
 
 function Aplicacion() {
   const { avisar } = useAviso()
+  const revisionApi = useRecargaApi()
   const [usuario, setUsuario] = useState(() => leerUsuario())
   const [vehiculos, setVehiculos] = useState(() => leerVehiculos())
   const [fotos, setFotos] = useState(() => leerFotos())
   const [vista, setVista] = useState(() =>
-    localStorage.getItem(TOKEN_KEY) ? 'principal' : 'login'
+    window.location.pathname === '/restablecer-contrasena' ? 'restablecer' : localStorage.getItem(TOKEN_KEY) ? 'principal' : 'login'
   )
+  const [abrirGasto, setAbrirGasto] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [instalable, setInstalable] = useState(false)
   const [homeEstado, setHomeEstado] = useState(null)
@@ -88,6 +95,25 @@ function Aplicacion() {
   const [volverCargaA, setVolverCargaA] = useState('gasolina')
   const [cargandoVehiculos, setCargandoVehiculos] = useState(false)
   const push = usePush()
+
+  useEffect(() => {
+    let activo = true
+    const cargar = async () => {
+      const cuenta = cuentaActual()
+      try {
+        const guardadas = await leerFotosVehiculos()
+        if (activo && cuenta === cuentaActual()) setFotos(guardadas)
+      } catch { /* La aplicación puede usarse aunque el almacenamiento esté restringido. */ }
+    }
+    void cargar()
+    window.addEventListener(EVENTO_FOTOS, cargar)
+    window.addEventListener(EVENTO_PENDIENTES, cargar)
+    return () => {
+      activo = false
+      window.removeEventListener(EVENTO_FOTOS, cargar)
+      window.removeEventListener(EVENTO_PENDIENTES, cargar)
+    }
+  }, [usuario?.id, usuario?.usuarioId])
 
   const cargarVehiculos = useCallback(async () => {
     if (!localStorage.getItem(TOKEN_KEY)) return
@@ -97,9 +123,7 @@ function Aplicacion() {
       const lista = Array.isArray(datos) ? datos : []
       setVehiculos(lista)
       localStorage.setItem(VEHICULOS_CACHE_KEY, JSON.stringify(lista))
-      if (!vehiculoSeleccionadoId && lista.length > 0) {
-        setVehiculoSeleccionadoId(lista.find((v) => v.esPrincipal)?.id || lista[0].id)
-      }
+      setVehiculoSeleccionadoId((actual) => lista.some((v) => v.id === actual) ? actual : lista.find((v) => v.esPrincipal)?.id || lista[0]?.id || null)
     } catch {
       try {
         const cache = localStorage.getItem(VEHICULOS_CACHE_KEY)
@@ -110,7 +134,19 @@ function Aplicacion() {
     } finally {
       setCargandoVehiculos(false)
     }
-  }, [vehiculoSeleccionadoId])
+  }, [])
+
+  const cargarPerfil = useCallback(async () => {
+    try {
+      const datos = await obtenerPerfil()
+      setUsuario((anterior) => {
+        if (!anterior) return anterior
+        const info = { ...anterior, ...datos }
+        localStorage.setItem(USUARIO_KEY, JSON.stringify(info))
+        return info
+      })
+    } catch { /* El cliente HTTP maneja una sesión vencida. */ }
+  }, [])
 
   const cargarHome = useCallback(async () => {
     try {
@@ -132,20 +168,18 @@ function Aplicacion() {
       setUsuario(null)
       setVehiculos([])
       setFotos({})
-      setVista('login')
+      localStorage.removeItem('autiva_unidad')
+      setVista((actual) => actual === 'restablecer' || actual === 'recuperar' ? actual : 'login')
     }
 
     window.addEventListener('autiva:unauthorized', onUnauthorized)
 
     if (localStorage.getItem(TOKEN_KEY)) {
-      void (async () => {
-        await cargarVehiculos().catch(() => {})
-        await cargarHome().catch(() => {})
-      })()
+      void (async () => { await Promise.allSettled([cargarVehiculos(), cargarHome(), cargarPerfil()]) })()
     }
 
     return () => window.removeEventListener('autiva:unauthorized', onUnauthorized)
-  }, [cargarVehiculos, cargarHome])
+  }, [cargarVehiculos, cargarHome, cargarPerfil, revisionApi])
 
   useEffect(() => {
     const onBeforeInstallPrompt = (event) => {
@@ -171,6 +205,11 @@ function Aplicacion() {
   // Al terminar de enviar la cola offline se avisa y se refrescan los datos.
   useEffect(() => {
     const onPendientes = (evento) => {
+      for (const vinculo of evento.detail?.vehiculosSincronizados || []) {
+        setVehiculoSeleccionadoId((actual) => actual === vinculo.localId ? vinculo.vehiculo.id : actual)
+      }
+      const fallidos = evento.detail?.fallidos || []
+      if (fallidos.length) avisar(fallidos.map((f) => f.motivo).join(' '), 'error')
       const enviados = evento.detail?.sincronizados
       if (!enviados) return
       avisar(
@@ -193,6 +232,7 @@ function Aplicacion() {
   }, [push, avisar])
 
   const navegar = (destino) => {
+    setAbrirGasto(false)
     setVista(destino)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -233,6 +273,7 @@ function Aplicacion() {
     setVista('principal')
     void cargarVehiculos()
     void cargarHome()
+    void cargarPerfil()
     // Envía lo capturado sin conexión que quedó pendiente antes de iniciar sesión.
     sincronizarEnSegundoPlano()
   }
@@ -245,6 +286,8 @@ function Aplicacion() {
     } catch {
       // Ignora errores: el token se elimina del dispositivo a continuación.
     }
+    limpiarCacheApi()
+    localStorage.removeItem('autiva_unidad')
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USUARIO_KEY)
     localStorage.removeItem(VEHICULOS_KEY)
@@ -261,8 +304,14 @@ function Aplicacion() {
   }
 
   const handleVehiculoRegistrado = (datos) => {
+    setVehiculos((actuales) => {
+      const lista = [...actuales.filter((v) => v.id !== datos.id), datos]
+      localStorage.setItem(VEHICULOS_CACHE_KEY, JSON.stringify(lista))
+      return lista
+    })
+    setVehiculoSeleccionadoId(datos.id)
     void cargarVehiculos()
-    avisar(`${datos.marca} ${datos.modelo} se agregó a tu expediente.`)
+    avisar(datos.pendienteSincronizacion ? 'Vehículo guardado en este dispositivo. Se enviará automáticamente cuando haya conexión.' : `${datos.marca} ${datos.modelo} se agregó a tu expediente.`)
     navegar('vehiculos')
   }
 
@@ -300,6 +349,11 @@ function Aplicacion() {
   // Acciones del botón «Registrar»: llevan directo al formulario
   // usando el vehículo seleccionado o el principal.
   const handleAccionRapida = (tipo) => {
+    if (tipo === 'gasto') {
+      navegar('gastos')
+      setAbrirGasto(true)
+      return
+    }
     if (tipo === 'recordatorio') {
       navegar('recordatorios')
       return
@@ -327,7 +381,7 @@ function Aplicacion() {
 
   const handleCargaGuardada = (datos, _editando, pendiente) => {
     if (pendiente) {
-      avisar('Sin conexión: la carga se guardó en tu dispositivo y se enviará al recuperar la conexión.', 'info')
+      avisar('Carga guardada en tu dispositivo. La sincronización se realiza automáticamente cuando hay conexión.', 'info')
     } else {
       void cargarVehiculos()
       avisar('Carga registrada correctamente.')
@@ -337,13 +391,19 @@ function Aplicacion() {
 
   const handleServicioGuardado = (datos, _editando, pendiente) => {
     if (pendiente) {
-      avisar('Sin conexión: el servicio se guardó en tu dispositivo y se enviará al recuperar la conexión.', 'info')
+      avisar('Servicio guardado en tu dispositivo. La sincronización se realiza automáticamente cuando hay conexión.', 'info')
     } else {
       void cargarVehiculos()
       avisar('Servicio registrado correctamente.')
     }
     navegar('mantenimiento')
   }
+
+  const volverLogin = () => { window.history.replaceState({}, '', '/'); setVista('login') }
+  if (vista === 'restablecer') return <RecuperarContrasenaPage restablecer onVolver={volverLogin} onPedirOtro={() => { window.history.replaceState({}, '', '/'); setVista('recuperar') }} />
+
+  if (vista === 'recuperar') return <RecuperarContrasenaPage onVolver={volverLogin} />
+  if (vista === 'login') return <LoginPage onLogin={handleLogin} onIrARegistro={() => setVista('registro')} onIrARecuperar={() => setVista('recuperar')} />
 
   if (!usuario) {
     if (vista === 'registro') {
@@ -423,6 +483,8 @@ function Aplicacion() {
         onMarcarActivo={handleMarcarActivo}
         onActualizarOdometro={handleActualizarOdometro}
         onRegistrarCarga={(id) => irARegistrarCarga(id, 'vehiculoDetalle')}
+        onActualizado={() => { void cargarVehiculos(); void cargarHome() }}
+        onEliminado={() => { setVehiculoSeleccionadoId(null); void cargarVehiculos(); void cargarHome(); navegar('vehiculos') }}
         onIrARecordatorios={(id) => {
           setVehiculoSeleccionadoId(id)
           navegar('recordatorios')
@@ -478,7 +540,7 @@ function Aplicacion() {
       />
     )
   } else if (vistaActual === 'gastos') {
-    contenido = <GastosPage onNavegar={navegar} />
+    contenido = <GastosPage key={abrirGasto ? 'registro' : 'historial'} iniciarRegistro={abrirGasto} vehiculos={vehiculos} vehiculoId={vehiculoSeleccionadoId} onSeleccionarVehiculo={setVehiculoSeleccionadoId} onActualizado={() => { void cargarVehiculos(); void cargarHome() }} />
   } else if (vistaActual === 'recordatorios') {
     contenido = (
       <RecordatoriosPage
@@ -499,6 +561,7 @@ function Aplicacion() {
     contenido = (
       <PerfilPage
         usuario={usuario}
+        onUsuarioActualizado={(datos) => { const info = { ...usuario, ...datos }; setUsuario(info); localStorage.setItem(USUARIO_KEY, JSON.stringify(info)) }}
         onLogout={handleLogout}
         push={push}
       />
@@ -521,7 +584,7 @@ function Aplicacion() {
       onAccionRapida={handleAccionRapida}
       push={push}
     >
-      {contenido}
+      <Suspense fallback={<p className="estado-carga" role="status">Abriendo pantalla…</p>}>{contenido}</Suspense>
     </AppLayout>
   )
 }
@@ -530,7 +593,7 @@ function App() {
   return (
     <TemaProvider>
       <AvisoProvider>
-        <Aplicacion />
+        <Suspense fallback={<p className="estado-carga" role="status">Abriendo Autiva…</p>}><Aplicacion /></Suspense>
       </AvisoProvider>
     </TemaProvider>
   )

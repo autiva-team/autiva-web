@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#badfff"/><stop offset=".55" stop-color="#91c7fb"/><stop offset="1" stop-color="#70b0f2"/></linearGradient>
+    <linearGradient id="ribbon" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#e2f2ff" stop-opacity=".48"/><stop offset="1" stop-color="#c4e5ff" stop-opacity=".22"/></linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a4d3ff" stop-opacity=".12"/><stop offset="1" stop-color="#438ee8" stop-opacity=".3"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#eef8ff" stop-opacity=".38"/><stop offset="1" stop-color="#eef8ff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <path fill="url(#base)" d="M0 0h1920v1080H0z"/>
+  <ellipse cx="540" cy="100" rx="1100" ry="750" fill="url(#glow)"/>
+  <path fill="url(#ribbon)" d="M-300 650C180 330 680 400 1160 180S1770-160 2150-260L2150 0C1690 140 1550 390 1040 530S180 640-300 1020Z"/>
+  <path fill="url(#blue)" d="M-220 1070C280 700 850 840 1390 550S1880 300 2140 180L2140 1080H-220Z"/>
+  <path fill="url(#ribbon)" d="M260 1260C780 890 1240 970 2110 390L2110 720C1530 1080 1150 1200 800 1300Z"/>
+</svg>

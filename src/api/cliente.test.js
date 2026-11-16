@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { request } from './cliente'
+import { request, limpiarCacheApi, invalidarDatos } from './cliente'
 
 function respuesta({ ok = true, status = 200, json, tipo = 'application/json', texto = '' } = {}) {
   return {
@@ -12,6 +12,7 @@ function respuesta({ ok = true, status = 200, json, tipo = 'application/json', t
 }
 
 beforeEach(() => {
+  limpiarCacheApi()
   globalThis.fetch = vi.fn()
 })
 
@@ -74,4 +75,57 @@ describe('request', () => {
     await expect(request('/api/auth/login')).rejects.toMatchObject({ message: 'Credenciales inválidas.' })
     expect(localStorage.getItem('autiva_token')).toBe('abc')
   })
+})
+
+it('omite Authorization para recuperar contraseña aunque exista sesión', async () => {
+  localStorage.setItem('autiva_token', 'abc')
+  fetch.mockResolvedValue(respuesta({ json: { mensaje: 'Enlace solicitado' } }))
+  await request('/api/auth/recuperar-contrasena', { method: 'POST', sinAutenticacion: true })
+  expect(fetch.mock.calls[0][1].headers.Authorization).toBeUndefined()
+  expect(fetch.mock.calls[0][1]).not.toHaveProperty('sinAutenticacion')
+})
+
+it('comparte una sola petición GET entre consultas simultáneas', async () => {
+  localStorage.setItem('autiva_token', 'abc')
+  let resolver
+  fetch.mockReturnValue(new Promise((r) => { resolver = r }))
+  const uno = request('/api/vehiculos')
+  const dos = request('/api/vehiculos')
+  expect(fetch).toHaveBeenCalledTimes(1)
+  resolver(respuesta({ json: [{ id: 'v1' }] }))
+  expect(await uno).toEqual(await dos)
+})
+
+it('devuelve la caché inmediatamente mientras revalida una petición lenta', async () => {
+  localStorage.setItem('autiva_token', 'abc')
+  fetch.mockResolvedValueOnce(respuesta({ json: [{ id: 'v1' }] }))
+  await request('/api/vehiculos')
+  invalidarDatos()
+  let resolver
+  fetch.mockReturnValue(new Promise((r) => { resolver = r }))
+  expect(await request('/api/vehiculos')).toEqual([{ id: 'v1' }])
+  expect(fetch).toHaveBeenCalledTimes(2)
+  resolver(respuesta({ json: [{ id: 'v2' }] }))
+  await vi.waitFor(async () => expect(await request('/api/vehiculos')).toEqual([{ id: 'v2' }]))
+})
+
+it('no comparte datos guardados entre cuentas', async () => {
+  localStorage.setItem('autiva_token', 't1')
+  localStorage.setItem('autiva_usuario', JSON.stringify({ id: 'u1' }))
+  fetch.mockResolvedValueOnce(respuesta({ json: [{ id: 'privado' }] }))
+  await request('/api/vehiculos')
+  localStorage.setItem('autiva_token', 't2')
+  localStorage.setItem('autiva_usuario', JSON.stringify({ id: 'u2' }))
+  fetch.mockResolvedValueOnce(respuesta({ json: [] }))
+  expect(await request('/api/vehiculos')).toEqual([])
+  expect(fetch).toHaveBeenCalledTimes(2)
+})
+
+it('sin conexión devuelve datos guardados sin esperar a la red', async () => {
+  localStorage.setItem('autiva_token', 'abc')
+  fetch.mockResolvedValue(respuesta({ json: [{ id: 'v1' }] }))
+  await request('/api/vehiculos')
+  Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+  try { expect(await request('/api/vehiculos')).toEqual([{ id: 'v1' }]); expect(fetch).toHaveBeenCalledTimes(1) }
+  finally { Object.defineProperty(navigator, 'onLine', { configurable: true, value: true }) }
 })

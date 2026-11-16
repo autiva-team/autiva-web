@@ -31,8 +31,8 @@
 /* En móvil solo el punto para no saturar la barra. */
 @media (max-width: 480px) {
   .conexion-badge {
-    font-size: 0;
-    gap: 0;
+    font-size: .7rem;
+    gap: 5px;
     padding: 6px;
   }
 

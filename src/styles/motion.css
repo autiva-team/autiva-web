@@ -1,0 +1,59 @@
+/* Patrones visuales inspirados en React Bits; colores y geometría de Autiva. */
+.texto-entrada-palabra { display:inline-block; white-space:pre; animation:entrada-texto 380ms cubic-bezier(.2,.75,.3,1) var(--entrada-retardo,0ms) both; }
+@keyframes entrada-texto { from { opacity:.45; filter:blur(3px); translate:0 7px; } to { opacity:1; filter:blur(0); translate:0 0; } }
+.page-subtitulo,.saludo-texto,.auth-subtexto { animation:entrada-descripcion 430ms ease-out both; }
+@keyframes entrada-descripcion { from { opacity:.55; translate:0 4px; } to { opacity:1; translate:0 0; } }
+@supports ((background-clip:text) or (-webkit-background-clip:text)) {
+  .eyebrow,.grafica-eyebrow { background-image:linear-gradient(105deg,var(--texto-3) 25%,var(--primario) 45%,var(--texto-3) 65%); background-size:220% 100%; background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:brillo-texto 1800ms ease-out 1; }
+}
+@keyframes brillo-texto { from { background-position:100% 0; } to { background-position:-100% 0; } }
+.seccion-head h2,.grafica-cabecera h3 { animation:entrada-descripcion 350ms ease-out both; }
+/* El foco de luz se dibuja en una capa; nunca cambia el fondo oficial ni el tamaño. */
+.tarjeta,.perfil-card,.perfil-bloque,.gastos-filtros,.accion-card,.btn,.accion-principal,.secundario,.icon-button,.nav-item,.bottom-item { position:relative; }
+.tarjeta::after,.perfil-card::after,.perfil-bloque::after,.gastos-filtros::after,.accion-card::after,.btn::before,.accion-principal::before,.secundario::before,.icon-button::before,.nav-item::after,.bottom-item::after {
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:radial-gradient(220px circle at var(--luz-x,50%) var(--luz-y,50%),var(--luz-relleno,rgba(255,255,255,.26)),rgba(166,207,255,.06) 45%,transparent 72%); opacity:0; transition:opacity 180ms ease;
+}
+[data-luz-activa]::after,[data-luz-activa]::before { opacity:1; }
+:root[data-theme='dark'] { --luz-relleno:rgba(139,188,255,.16); }
+/* Star Border: un borde luminoso únicamente al interactuar con la acción principal. */
+@property --borde-angulo { syntax:'<angle>'; initial-value:0deg; inherits:false; }
+.btn--primario::after,.accion-principal::after {
+  content:''; position:absolute; inset:-1px; padding:1px; border-radius:inherit; pointer-events:none; opacity:0; background:conic-gradient(from var(--borde-angulo),transparent 0% 25%,rgba(140,190,255,.8) 40%,rgba(255,255,255,.95) 50%,rgba(140,190,255,.8) 60%,transparent 75% 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; transition:opacity 180ms ease;
+}
+@media(hover:hover) and (pointer:fine) {
+  .btn--primario:hover:not(:disabled)::after,.accion-principal:hover:not(:disabled)::after { opacity:1; animation:borde-luminoso 2500ms linear infinite; }
+  .btn:hover:not(:disabled),.accion-principal:hover:not(:disabled) { translate:0 -1px; }
+}
+.btn--primario:focus-visible::after,.accion-principal:focus-visible::after { opacity:1; }
+@keyframes borde-luminoso { to { --borde-angulo:360deg; } }
+.btn,.accion-principal { transition:background .15s ease,box-shadow .18s ease,translate .18s ease,transform .15s ease; }
+.interacciones-capa { position:fixed; inset:0; z-index:90; pointer-events:none; overflow:hidden; contain:strict; }
+.interaccion-onda { position:absolute; width:18px; height:18px; border:1.5px solid var(--primario); border-radius:50%; box-shadow:0 0 10px rgba(117,171,255,.25); pointer-events:none; }
+.fondo-brillo-ambiente { position:absolute; inset:-5%; pointer-events:none; background:radial-gradient(ellipse at 15% 35%,rgba(255,255,255,.16),transparent 45%),radial-gradient(ellipse at 85% 70%,rgba(124,183,255,.1),transparent 45%); animation:brillo-ambiente 18s ease-in-out infinite alternate; }
+:root[data-theme='dark'] .fondo-brillo-ambiente { opacity:.55; }
+@keyframes brillo-ambiente { from { transform:translate3d(-1%,0,0); opacity:.45; } to { transform:translate3d(1%,1%,0); opacity:.8; } }
+[data-animaciones-pausadas] *,[data-animaciones-pausadas] *::before,[data-animaciones-pausadas] *::after { animation-play-state:paused; }
+@media(prefers-reduced-motion:reduce) {
+  .texto-entrada-palabra,.page-subtitulo,.saludo-texto,.auth-subtexto,.eyebrow,.grafica-eyebrow,.seccion-head h2,.grafica-cabecera h3,.fondo-brillo-ambiente { animation:none; filter:none; translate:none; opacity:1; }
+  .tarjeta::after,.perfil-card::after,.perfil-bloque::after,.gastos-filtros::after,.accion-card::after,.btn::before,.btn--primario::after,.accion-principal::before,.accion-principal::after,.secundario::before,.icon-button::before,.nav-item::after,.bottom-item::after { display:none; animation:none; transition:none; }
+  .interacciones-capa { display:none; }
+  .btn:hover:not(:disabled),.accion-principal:hover:not(:disabled) { translate:none; }
+}
+@media(forced-colors:active) {
+  .eyebrow,.grafica-eyebrow { -webkit-text-fill-color:currentColor; background:none; }
+  .interacciones-capa,.fondo-brillo-ambiente { display:none; }
+}
+/* La iluminación queda detrás de las letras para conservar su contraste. */
+.tarjeta,.perfil-card,.perfil-bloque,.gastos-filtros,.accion-card,.btn,.accion-principal,.secundario,.icon-button,.nav-item,.bottom-item { isolation:isolate; }
+.tarjeta::after,.perfil-card::after,.perfil-bloque::after,.gastos-filtros::after,.accion-card::after,.btn::before,.accion-principal::before,.secundario::before,.icon-button::before,.nav-item::after,.bottom-item::after { z-index:-1; }
+.btn--primario::after,.accion-principal::after { z-index:1; }
+
+/* Estela líquida inspirada en Blob Cursor y destellos de Click Spark. */
+.cursor-halo { position:absolute; left:0; top:0; width:0; height:0; opacity:0; transition:opacity .18s; pointer-events:none; }
+.cursor-halo::before { content:''; position:absolute; inset:-17px; border:1px solid rgba(69,148,255,.65); border-radius:50%; background:radial-gradient(circle,rgba(143,226,255,.2),transparent 70%); box-shadow:0 0 18px rgba(63,149,255,.24),inset 0 0 10px rgba(125,218,255,.2); }
+.cursor-estela { position:absolute; width:30px; height:30px; pointer-events:none; border-radius:58% 42% 63% 37%; background:radial-gradient(circle at 30% 30%,rgba(119,238,255,.65),rgba(83,123,255,.3) 55%,transparent 75%); filter:blur(3px); }
+.cursor-chispa { position:absolute; width:10px; height:2px; border-radius:4px; background:#6bafff; box-shadow:0 0 5px #9cecff; pointer-events:none; transform-origin:0 50%; }
+@media(hover:none),(pointer:coarse) { .cursor-halo,.cursor-estela,.cursor-chispa { display:none; } }
+.vehiculo-foto-preview { display:block; width:100%; max-height:210px; object-fit:contain; border-radius:18px; background:rgba(128,160,200,.08); }
+input[type='file']::file-selector-button { border:1px solid rgba(120,163,222,.3); border-radius:12px; padding:9px 12px; margin-right:12px; background:rgba(124,178,255,.15); color:inherit; font:inherit; cursor:pointer; }

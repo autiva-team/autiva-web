@@ -1,3 +1,5 @@
+import TextoAnimado from '../../components/motion/TextoAnimado'
+import { useRecargaApi } from '../../api/useRecargaApi'
 import { useEffect, useState } from 'react'
 import Icon from '../../components/Icons'
 import { anioVehiculo, nombreVehiculo } from '../../utils/vehiculo'
@@ -40,7 +42,7 @@ const acciones = [
     id: 'gastos',
     icon: 'wallet',
     titulo: 'Gastos',
-    subtitulo: 'Próximamente',
+    subtitulo: 'Pagos y resumen mensual',
   },
   {
     id: 'recordatorios',
@@ -52,7 +54,7 @@ const acciones = [
     id: 'estadisticas',
     icon: 'chart',
     titulo: 'Estadísticas',
-    subtitulo: 'Próximamente',
+    subtitulo: 'Gráficas, costos y rendimiento',
   },
 ]
 
@@ -115,6 +117,7 @@ export default function PrincipalPage({
   const [ultimoServicio, setUltimoServicio] = useState(null)
   const [resumenVehiculo, setResumenVehiculo] = useState(null)
   // Con la API completa: recordatorios del servidor (null = no se pudo consultar).
+  const revisionApi = useRecargaApi()
   const [recordatoriosApi, setRecordatoriosApi] = useState([])
   const [modalOdometro, setModalOdometro] = useState(false)
   const [odometroNuevo, setOdometroNuevo] = useState('')
@@ -168,7 +171,7 @@ export default function PrincipalPage({
     return () => {
       activo = false
     }
-  }, [vehiculoActivoId])
+  }, [vehiculoActivoId, revisionApi])
 
   const rendimientoValor = vehiculoActivoId ? extraerRendimiento(rendimiento) : null
   // GET /api/vehiculos/{id}/cargas/rendimiento → gastoMesActual (combustible del mes).
@@ -233,7 +236,7 @@ export default function PrincipalPage({
       <section className="saludo" aria-labelledby="titulo-saludo">
         <div>
           <p className="eyebrow">{fechaHoy()}</p>
-          <h1 id="titulo-saludo">Hola, {primerNombre(usuario?.nombre)}</h1>
+          <h1 id="titulo-saludo"><TextoAnimado texto={`Hola, ${primerNombre(usuario?.nombre)}`} /></h1>
           <p className="saludo-texto">
             {totalVehiculos > 0
               ? '¿Qué quieres anotar hoy? Mantener tu bitácora al día te da cálculos más precisos.'
@@ -270,15 +273,18 @@ export default function PrincipalPage({
       )}
 
       {vehiculoActivo ? (
-        <section className="vehiculo-activo tarjeta" aria-label={`Vehículo principal: ${vehiculoActivo.marca} ${vehiculoActivo.modelo}`}>
+        <section className={`vehiculo-activo tarjeta${fotoActiva ? ' vehiculo-activo--con-foto' : ''}`} aria-label={`Vehículo principal: ${vehiculoActivo.marca} ${vehiculoActivo.modelo}`}>
           {fotoActiva && (
+            <div className="vehiculo-foto-marco">
             <img
               src={fotoActiva}
               alt={`${vehiculoActivo.marca} ${vehiculoActivo.modelo}`}
               className="vehiculo-foto-banner"
             />
+            </div>
           )}
 
+          <div className="vehiculo-detalles">
           <div className="vehiculo-head">
             <div>
               <h2>
@@ -338,6 +344,7 @@ export default function PrincipalPage({
             <strong className={String(vehiculoActivo.estatus).toLowerCase() === 'en taller' ? 'texto-aviso' : 'texto-exito'}>
               <span className="capitalizar-primera">{vehiculoActivo.estatus || 'activo'}</span>
             </strong>
+          </div>
           </div>
         </section>
       ) : (
