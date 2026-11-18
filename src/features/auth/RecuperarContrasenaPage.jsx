@@ -26,7 +26,7 @@ export default function RecuperarContrasenaPage({ onVolver, restablecer = false,
     finally { setCargando(false) }
   }
   const invalido = restablecer && !token
-  return <AppShell titulo={restablecer ? 'Restablecer contraseña' : 'Recuperar contraseña'} descripcion={restablecer ? 'Crea una contraseña nueva para tu cuenta.' : 'Solicita un enlace para recuperar el acceso.'}>
+  return <AppShell onVolver={onVolver} textoVolver="Iniciar sesión" titulo={restablecer ? 'Restablecer contraseña' : 'Recuperar contraseña'} descripcion={restablecer ? 'Crea una contraseña nueva para tu cuenta.' : 'Solicita un enlace para recuperar el acceso.'}>
     {invalido && <Alerta tipo="error">El enlace no es válido.</Alerta>}
     {error && <Alerta tipo="error">{error}</Alerta>}
     {mensaje && <Alerta tipo="exito">{mensaje}</Alerta>}

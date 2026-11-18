@@ -86,6 +86,8 @@ function iniciales(nombre = '') {
     .toUpperCase()
 }
 
+const VISTAS_CON_VOLVER = ['vehiculos', 'gasolina', 'mantenimiento', 'gastos', 'recordatorios', 'estadisticas', 'perfil']
+
 export default function AppLayout({
   usuario,
   vista,
@@ -426,6 +428,12 @@ export default function AppLayout({
         </header>
 
         <main className="app-body" id="contenido-principal" ref={mainRef} tabIndex={-1}>
+          {VISTAS_CON_VOLVER.includes(vista) && (
+            <button type="button" className="volver volver--seccion" onClick={() => onNavegar('principal')}>
+              <Icon name="chevron-izquierda" size={18} />
+              Inicio
+            </button>
+          )}
           {children}
         </main>
 

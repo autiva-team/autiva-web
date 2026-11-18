@@ -386,3 +386,7 @@
     padding-inline: 8px;
   }
 }
+
+/* ---------- React Bits ---------- */
+.saludo-titulo { width: min(100%, 520px); height: clamp(56px, 12vw, 96px); margin: 0; }
+.dashboard .flowing-menu { border: 1px solid var(--borde); border-radius: var(--radio-md); overflow: hidden; }

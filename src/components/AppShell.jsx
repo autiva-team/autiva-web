@@ -11,7 +11,7 @@ import './AppShell.css'
  * una tarjeta de vidrio translúcida: a la izquierda qué ofrece la app,
  * a la derecha una sola tarea con un solo botón principal.
  */
-export default function AppShell({ titulo, descripcion, children }) {
+export default function AppShell({ titulo, descripcion, onVolver, textoVolver = 'Volver', children }) {
   const { tema, alternarTema } = useTema()
 
   return (
@@ -21,16 +21,6 @@ export default function AppShell({ titulo, descripcion, children }) {
       <a className="skip-link" href="#formulario-acceso">
         Saltar al formulario
       </a>
-
-      <button
-        type="button"
-        className="icon-button auth-tema-toggle"
-        onClick={alternarTema}
-        aria-label={tema === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-        title={tema === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-      >
-        <Icon name={tema === 'dark' ? 'sol' : 'luna'} size={20} />
-      </button>
 
       <main className="auth-main" id="contenido-principal">
         <div className="auth-vidrio">
@@ -67,6 +57,21 @@ export default function AppShell({ titulo, descripcion, children }) {
           </aside>
 
           <section className="auth-card" id="formulario-acceso" aria-labelledby="titulo-acceso" tabIndex={-1}>
+        <button
+          type="button"
+          className="icon-button auth-tema-toggle"
+          onClick={alternarTema}
+          aria-label={tema === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          title={tema === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+        >
+          <Icon name={tema === 'dark' ? 'sol' : 'luna'} size={20} />
+        </button>
+            {onVolver && (
+              <button type="button" className="volver" onClick={onVolver}>
+                <Icon name="chevron-izquierda" size={18} />
+                {textoVolver}
+              </button>
+            )}
             <div className="auth-marca-movil" aria-hidden="true">
               <LogoMarca pequeno />
               <span>Autiva</span>

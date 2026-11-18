@@ -1,3 +1,5 @@
+import TextPressure from '../../components/reactbits/TextPressure'
+import Inclinable from '../../components/reactbits/Inclinable'
 import TextoAnimado from '../../components/motion/TextoAnimado'
 import { useRecargaApi } from '../../api/useRecargaApi'
 import { fechaUtc } from '../../utils/fechas'
@@ -131,7 +133,7 @@ export default function VehiculoDetallePage({
       <section className="page-head">
         <div>
           <p className="eyebrow">Expediente del vehículo</p>
-          <h1><TextoAnimado texto={`${vehiculo.marca} ${vehiculo.modelo}`} /></h1>
+          <h1 className="detalle-titulo" aria-label={`${vehiculo.marca} ${vehiculo.modelo}`}><TextPressure text={`${vehiculo.marca} ${vehiculo.modelo}`} textColor="#2563eb" pressureColor="#0ea5e9" minFontSize={28} /></h1>
           {detalleVehiculo(vehiculo) && <p className="page-subtitulo">{detalleVehiculo(vehiculo)}</p>}
         </div>
         <div className="page-head-acciones">
@@ -149,7 +151,7 @@ export default function VehiculoDetallePage({
 
       {edicion && <VehiculoEdicion vehiculo={vehiculo} foto={foto} onCerrar={() => setEdicion(false)} onGuardado={(datos) => { setVehiculo(datos); setEdicion(false); onActualizado?.(); avisar('Se actualizó el vehículo con éxito.') }} />}
       {borrado && <ConfirmarEliminacion titulo="¿Eliminar vehículo?" mensaje="El vehículo y todos sus registros dejarán de aparecer. Esta acción no se puede deshacer desde la aplicación." eliminar={async () => { await eliminarVehiculo(vehiculo.id); await quitarPendientesVehiculo(vehiculo.id); await eliminarFotoVehiculo(vehiculo.id); localStorage.removeItem('autiva_cargas_' + vehiculo.id) }} onCerrar={() => setBorrado(false)} onEliminado={() => { setBorrado(false); avisar('Se eliminó el vehículo con éxito.'); onEliminado?.() }} />}
-      <section className="detalle-banner tarjeta">
+      <Inclinable className="detalle-banner tarjeta">
         {foto ? (
           <img src={foto} alt={`Foto de ${vehiculo.marca} ${vehiculo.modelo}`} className="detalle-foto-grande" />
         ) : (
@@ -172,7 +174,7 @@ export default function VehiculoDetallePage({
           </p>
         </div>
         {vehiculo.esPrincipal && <span className="badge badge--primario detalle-badge">Principal</span>}
-      </section>
+      </Inclinable>
 
       <section className="detalle-card tarjeta" aria-labelledby="titulo-info">
         <h2 id="titulo-info">Información del vehículo</h2>
