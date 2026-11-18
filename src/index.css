@@ -2313,3 +2313,6 @@ body {
 /* Los controles de edición conservan tamaño y foco en los diálogos. */
 .formulario-edicion .campo-control[type="checkbox"] { width:22px; height:22px; min-height:22px; padding:0; accent-color:var(--primario); cursor:pointer; }
 .formulario-edicion .modal-acciones { margin-top:20px; }
+
+/* Flecha de regreso de las secciones principales (hacia Inicio). */
+.volver--seccion { margin: 0 0 var(--esp-2) calc(var(--esp-2) * -1); }
