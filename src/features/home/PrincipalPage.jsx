@@ -1,4 +1,5 @@
-import TextoAnimado from '../../components/motion/TextoAnimado'
+import TextPressure from '../../components/reactbits/TextPressure'
+import FlowingMenu from '../../components/reactbits/FlowingMenu'
 import { useRecargaApi } from '../../api/useRecargaApi'
 import { useEffect, useState } from 'react'
 import Icon from '../../components/Icons'
@@ -236,7 +237,9 @@ export default function PrincipalPage({
       <section className="saludo" aria-labelledby="titulo-saludo">
         <div>
           <p className="eyebrow">{fechaHoy()}</p>
-          <h1 id="titulo-saludo"><TextoAnimado texto={`Hola, ${primerNombre(usuario?.nombre)}`} /></h1>
+          <h1 id="titulo-saludo" className="saludo-titulo" aria-label={`Hola, ${primerNombre(usuario?.nombre)}`}>
+            <TextPressure text={`Hola, ${primerNombre(usuario?.nombre)}`} textColor="#2563eb" pressureColor="#0ea5e9" minFontSize={32} />
+          </h1>
           <p className="saludo-texto">
             {totalVehiculos > 0
               ? '¿Qué quieres anotar hoy? Mantener tu bitácora al día te da cálculos más precisos.'
@@ -468,26 +471,19 @@ export default function PrincipalPage({
         <div className="seccion-head">
           <h2 id="titulo-gestion">Consultar</h2>
         </div>
-        <ul className="grid-acciones">
-          {acciones.map((accion) => (
-            <li key={accion.id}>
-              <button
-                type="button"
-                className="accion-card"
-                onClick={() => onNavegar(accion.id)}
-              >
-                <span className="icono-tono tono-azul" aria-hidden="true">
-                  <Icon name={accion.icon} size={20} />
-                </span>
-                <span className="accion-texto">
-                  <span className="accion-titulo">{accion.titulo}</span>
-                  <span className="accion-subtitulo">{accion.subtitulo}</span>
-                </span>
-                <Icon name="chevron-derecha" size={18} className="accion-flecha" />
-              </button>
-            </li>
-          ))}
-        </ul>
+        <FlowingMenu
+          ariaLabel="Secciones de Autiva"
+          items={acciones.map((accion) => ({ id: accion.id, text: accion.titulo, meta: accion.subtitulo }))}
+          onItemClick={(item) => onNavegar(item.id)}
+          textColor="var(--texto)"
+          bgColor="var(--superficie)"
+          marqueeBgColor="var(--primario)"
+          marqueeTextColor="#ffffff"
+          borderColor="var(--borde)"
+          showIndex
+          showArrow
+          align="left"
+        />
       </section>
 
       <section className="seccion pie-dashboard" aria-label="Estado de la aplicación">

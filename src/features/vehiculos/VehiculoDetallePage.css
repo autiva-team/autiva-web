@@ -226,3 +226,6 @@
     width: 100%;
   }
 }
+
+/* ---------- React Bits ---------- */
+.detalle-titulo { width: min(100%, 520px); height: clamp(48px, 10vw, 80px); margin: 0; }

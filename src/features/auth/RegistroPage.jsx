@@ -106,7 +106,7 @@ export default function RegistroPage({ onIrALogin }) {
   }
 
   return (
-    <AppShell titulo="Crear cuenta" descripcion="Solo necesitas tu nombre, un correo y una contraseña.">
+    <AppShell onVolver={onIrALogin} textoVolver="Iniciar sesión" titulo="Crear cuenta" descripcion="Solo necesitas tu nombre, un correo y una contraseña.">
       <AuthTabs activo="registro" onLogin={onIrALogin} />
       <form ref={formRef} className="formulario" onSubmit={onSubmit} noValidate aria-busy={cargando || undefined}>
         <Campo etiqueta="Nombre" error={errores.nombre}>
