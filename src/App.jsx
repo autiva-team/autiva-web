@@ -23,6 +23,7 @@ const RecordatoriosPage = lazy(() => import('./features/recordatorios/Recordator
 const GastosPage = lazy(() => import('./features/gastos/GastosPage.jsx'))
 const EstadisticasPage = lazy(() => import('./features/estadisticas/EstadisticasPage.jsx'))
 import AppLayout from './app/AppLayout.jsx'
+import EfectoCursor from './components/reactbits/EfectoCursor.jsx'
 import { AvisoProvider, useAviso } from './components/Aviso'
 import { TemaProvider } from './context/TemaContext'
 import { usePush } from './push/usePush'
@@ -35,6 +36,7 @@ import './App.css'
 import { EVENTO_FOTOS, leerFotosVehiculos } from './features/vehiculos/fotosVehiculos'
 import { cuentaActual } from './offline/cuenta'
 
+const VISTAS_ACCESO = ['login', 'registro', 'recuperar', 'restablecer']
 const USUARIO_KEY = 'autiva_usuario'
 const TOKEN_KEY = 'autiva_token'
 const VEHICULOS_KEY = 'autiva_vehiculos'
@@ -95,6 +97,27 @@ function Aplicacion() {
   const [volverCargaA, setVolverCargaA] = useState('gasolina')
   const [cargandoVehiculos, setCargandoVehiculos] = useState(false)
   const push = usePush()
+
+  // El botón «atrás» del navegador o del teléfono recorre las pantallas de la app
+  // en lugar de salirse de ella.
+  useEffect(() => {
+    if (!window.history.state?.autiva) window.history.replaceState({ autiva: true, vista }, '')
+    const alRetroceder = (evento) => {
+      const destino = evento.state?.vista
+      if (!destino) return
+      const conSesion = !!localStorage.getItem(TOKEN_KEY)
+      const deAcceso = VISTAS_ACCESO.includes(destino)
+      setVista(conSesion ? (deAcceso ? 'principal' : destino) : (deAcceso ? destino : 'login'))
+    }
+    window.addEventListener('popstate', alRetroceder)
+    return () => window.removeEventListener('popstate', alRetroceder)
+    // Solo al montar: el estado inicial de la vista ya está en el historial.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (window.history.state?.vista !== vista) window.history.pushState({ autiva: true, vista }, '')
+  }, [vista])
 
   useEffect(() => {
     let activo = true
@@ -593,6 +616,7 @@ function App() {
   return (
     <TemaProvider>
       <AvisoProvider>
+        <EfectoCursor />
         <Suspense fallback={<p className="estado-carga" role="status">Abriendo Autiva…</p>}><Aplicacion /></Suspense>
       </AvisoProvider>
     </TemaProvider>
