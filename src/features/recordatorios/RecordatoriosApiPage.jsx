@@ -15,8 +15,8 @@ import TarjetaRecordatorio from './TarjetaRecordatorio'
 import './RecordatoriosPage.css'
 
 const FILTROS = [
-  { id: 'pendientes', nombre: 'Pendientes' },
   { id: 'atender', nombre: 'Por atender' },
+  { id: 'programados', nombre: 'Programados' },
   { id: 'completados', nombre: 'Completados' },
   { id: 'todos', nombre: 'Todos' },
 ]
@@ -24,7 +24,7 @@ const FILTROS = [
 const CONTADORES = [
   { id: 'vencidos', etiqueta: 'Vencidos', icono: 'alert', tono: 'tono-rojo' },
   { id: 'proximos', etiqueta: 'Próximos', icono: 'reloj', tono: 'tono-ambar' },
-  { id: 'pendientes', etiqueta: 'Pendientes', icono: 'bell', tono: 'tono-azul' },
+  { id: 'programados', etiqueta: 'Programados', icono: 'bell', tono: 'tono-azul' },
   { id: 'completados', etiqueta: 'Completados', icono: 'check-circulo', tono: 'tono-verde' },
 ]
 
@@ -53,7 +53,7 @@ export default function RecordatoriosApiPage({ vehiculos = [], vehiculoId, onSel
   const [cargandoLista, setCargandoLista] = useState(false)
   const [errorLista, setErrorLista] = useState('')
   const [intento, setIntento] = useState(0)
-  const [filtro, setFiltro] = useState('pendientes')
+  const [filtro, setFiltro] = useState('atender')
   const [modalAbierto, setModalAbierto] = useState(false)
   const [porConcluir, setPorConcluir] = useState(null)
   const [concluyendo, setConcluyendo] = useState(false)
@@ -92,11 +92,11 @@ export default function RecordatoriosApiPage({ vehiculos = [], vehiculoId, onSel
   const grupos = {
     vencidos: pendientes.filter((r) => r.estadoUi.tono === 'vencido'),
     proximos: pendientes.filter((r) => r.estadoUi.tono === 'proximo'),
-    pendientes,
+    programados: pendientes.filter((r) => !['vencido', 'proximo'].includes(r.estadoUi.tono)),
     completados: registros.filter((r) => r.estado === 'concluido'),
   }
   const visibles = {
-    pendientes,
+    programados: grupos.programados,
     atender: [...grupos.vencidos, ...grupos.proximos],
     completados: grupos.completados,
     todos: registros,
@@ -109,7 +109,7 @@ export default function RecordatoriosApiPage({ vehiculos = [], vehiculoId, onSel
 
   const alCrear = (_creado, enviados) => {
     setModalAbierto(false)
-    setFiltro('pendientes')
+    setFiltro('atender')
     recargar()
     avisar(`Recordatorio «${enviados.titulo}» creado. Te avisaremos con ${enviados.anticipacionDias} días de anticipación.`)
   }
@@ -175,11 +175,19 @@ export default function RecordatoriosApiPage({ vehiculos = [], vehiculoId, onSel
     contenidoLista = (
       <EstadoVacio
         icono={filtro === 'completados' ? 'check-circulo' : 'bell'}
-        titulo={filtro === 'completados' ? 'Aún no completas recordatorios' : 'Sin recordatorios en esta vista'}
+        titulo={
+          filtro === 'completados'
+            ? 'Aún no completas recordatorios'
+            : filtro === 'atender'
+              ? 'Nada por atender'
+              : 'Sin recordatorios en esta vista'
+        }
         texto={
           filtro === 'completados'
             ? 'Cuando marques un recordatorio como hecho aparecerá aquí.'
-            : 'Crea un recordatorio para no olvidar trámites y servicios de tu vehículo.'
+            : filtro === 'atender'
+              ? 'No tienes recordatorios vencidos ni próximos a vencer.'
+              : 'Crea un recordatorio para no olvidar trámites y servicios de tu vehículo.'
         }
       >
         <button type="button" className="btn btn--primario" onClick={() => setModalAbierto(true)}>
