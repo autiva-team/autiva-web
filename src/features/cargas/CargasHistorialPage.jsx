@@ -466,27 +466,35 @@ export default function CargasHistorialPage({
               </div>
             )}
           </div>
-          <div className="modal-acciones">
-            <button className="btn btn--secundario" onClick={() => { setEdicion(detalle); setDetalle(null) }}>Editar</button>
-            <button className="btn btn--secundario" onClick={() => { setBorrado(detalle); setDetalle(null) }}>Eliminar</button>
-            <button className="btn btn--secundario" onClick={() => { setEdicion(detalle); setDetalle(null) }}>Editar</button>
-            <button className="btn btn--secundario" onClick={() => { setBorrado(detalle); setDetalle(null) }}>Eliminar</button>
-            <button type="button" className="secundario" onClick={() => setDetalle(null)}>
+          <div className="modal-acciones carga-detalle-acciones">
+            <button type="button" className="btn btn--secundario" onClick={() => setDetalle(null)}>
               Cerrar
             </button>
-            {onEditarCarga && (
-              <button
-                type="button"
-                className="btn btn--primario"
-                onClick={() => {
+            <button
+              type="button"
+              className="btn btn--secundario"
+              onClick={() => {
+                setBorrado(detalle)
+                setDetalle(null)
+              }}
+            >
+              Eliminar
+            </button>
+            <button
+              type="button"
+              className="btn btn--primario"
+              onClick={() => {
+                if (onEditarCarga) {
                   onEditarCarga(detalle.id)
-                  setDetalle(null)
-                }}
-              >
-                <Icon name="editar" size={16} />
-                Editar carga
-              </button>
-            )}
+                } else {
+                  setEdicion(detalle)
+                }
+                setDetalle(null)
+              }}
+            >
+              <Icon name="editar" size={16} />
+              Editar
+            </button>
           </div>
         </Modal>
       )}
